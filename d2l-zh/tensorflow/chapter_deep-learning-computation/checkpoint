@@ -1,2 +1,0 @@
-model_checkpoint_path: "mlp.params"
-all_model_checkpoint_paths: "mlp.params"

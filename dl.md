@@ -22,7 +22,13 @@
 
 ![线性回归](pics/1.png)
 
-设最终学习到的模型权重W形状是(m+1) * 1,即最终的模型是：Y = X * W ,则损失函数为：
+设最终学习到的模型权重W形状是(m+1) * 1,即最终的模型是：
+
+$$
+\hat{Y} = X * W 
+$$
+
+则损失函数为：
 
 $$
 L = \frac{1}{2n}||Y - \hat{Y}||^2=\frac{1}{2n}\sum_{i=0}^{n-1}(Y_i-\hat{Y_i})^2=\frac{1}{2n}\sum_{i=0}^{n-1}(Y_i-X_i*W)^2
@@ -55,7 +61,42 @@ W_j^{(n+1)}= L - \alpha(\sum_{random \space choose \space some \space i \space f
 $$
 
 > 实验1：线性回归算法的具体实现(MBGD)：
+>
 >`code/linear_regression/linreg_low_level.py`
+>
 >`code/linear_regression/linreg_high_level.py`
 
-## 二、Softmax
+## 二、Softmax回归
+
+Softmax回归是一种多类分类算法。
+
+多类分类问题定义：给定n * (m+1)的矩阵X,代表n个样本，m个特征的样本组成的矩阵；给定n * 1的矩阵Y，代表n个样本的标签组成的矩阵，该矩阵的取值是离散多类的,一共k种。请学习X,Y中的规律（多类分类算法），使得给出一个新的样本x，预测该样本为y类别的概率尽可能大。
+
+![Softmax回归](pics/2.png)
+
+Softmax函数的定义是：
+
+$$
+Softmax(j) = \frac{exp(x_j)}{\sum_{i=0}^{k-1}exp(x_i)}
+$$
+
+设最终学习到的模型权重W形状是(m+1) * k,即最终的模型是：
+
+$$
+\hat{Y} = Softmax(X * W)
+$$
+
+Y hat 是一个n*k的矩阵，则损失函数为：
+
+$$
+L = -\frac{1}{n}\sum_{i=0}^{n-1} log \hat{Y_{ij}} \\
+j \space is \space the \space argmax \space index\space of \space the \space one \space hot \space encoding \space of \space the \space Y_i 
+$$
+
+按照梯度下降法更新参数W即可。
+
+> 实验2：Softmax回归算法的具体实现(MBGD)：
+>
+>`code/softmax_regression/softmax_low_level.py`
+>
+>`code/softmax_regression/softmax_high_level.py`
