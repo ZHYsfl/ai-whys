@@ -90,7 +90,7 @@ Y hat 是一个n*k的矩阵，则损失函数为：
 
 $$
 L = -\frac{1}{n}\sum_{i=0}^{n-1} log \hat{Y_{ij}} \\
-j \space is \space the \space argmax \space index\space of \space the \space one \space hot \space encoding \space of \space the \space Y_i 
+\text{j is the argmax index of  the one hot encoding of the }Y_i 
 $$
 
 按照梯度下降法更新参数W即可。
@@ -100,3 +100,66 @@ $$
 >`code/softmax_regression/softmax_low_level.py`
 >
 >`code/softmax_regression/softmax_high_level.py`
+
+## 三、多层感知机MLP
+
+![多层感知机MLP](pics/3.png)
+
+没有太多新的原理，趁着MLP的机会谈一下BP算法：
+
+
+
+## 四、欠拟合、过拟合、VC维、正则项、权重衰退、丢弃法
+
+当模型容量大于数据复杂度时，过拟合，当模型容量小于数据复杂度时，欠拟合。VC维指的是：对于一个分类模型，VC等于一个最大数据集的大小，不管如何给定标号，都存在一个模型来对它进行完美分类。
+
+防止过拟合的一些手段，比如加正则项。通过限制参数值的选择范围来控制模型容量：
+
+$$
+min \space l(W,B) 
+\\
+subject \space to \space ||w||^2 ≤ \theta
+$$
+
+通常不限制B，小的θ意味着更强的正则项。
+
+等价于:
+
+$$
+min \space l(W,B)+\frac{\lambda}{2}||W||^2
+$$
+
+这就是权重衰退，原因是：
+
+$$
+\frac{\partial}{\partial W} (l(W,B)+\frac{\lambda}{2}||W||^2) = \frac{\partial l(W,B)}{\partial W}+\lambda W
+$$
+
+时间t的更新你参数为：
+
+$$
+W_{t+1}=(1-η\lambda)W_t-η\frac{\partial l(W_t,B_t)}{\partial W_t}
+$$
+
+通常ηλ<1,在深度学习中称为权重衰退。
+
+还有一种防止过拟合的方法，叫丢弃法(dropout)，丢弃法将一些输出项随机置0来控制模型的复杂度，要求保持无偏性：对X加入噪音得到X'，我们希望：
+
+$$
+E(X') = X
+$$
+
+丢弃法对每个元素进行如下扰动：
+
+$$
+x_i' = \begin{cases} 0,& \text{with probability p} \\ \frac{x_i}{1-p} , & \text{otherwise}\end{cases}
+$$
+
+dropout只在训练时对某些作用层发挥作用，推理时不发挥作用。
+
+![丢弃法dropout](pics/4.png)
+
+> 实验3：Dropout的具体实现：
+>
+>`/home/zane/sound/deep-learning/code/dropout/dropout.py`
+
