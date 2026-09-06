@@ -367,6 +367,10 @@ $$
 (n_h×n_w,c_i)为输入的，权重参数为(c_o,c_i)的Linear(c_i,c_o)层
 $$
 
+> 实验6：1x1卷积的具体实现以及和全连接层等价的验证：
+>
+>`code/cnn/one_multiply_one_convolution.py`
+
 ---
 
 计算复杂度的计算：
@@ -477,7 +481,7 @@ $$
 O(c_o × c_i × k_h × k_w × m_h × m_w)
 $$
 
-> 实验6：多输入通道和多输出通道的具体实现：
+> 实验7：多输入通道和多输出通道的具体实现：
 >
 >`code/cnn/multi_input_and_output_channels.py`
 
