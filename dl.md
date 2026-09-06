@@ -45,20 +45,23 @@ $$
 BGD:
 
 $$
-W_j^{(n+1)}= L - \alpha(\sum_{i=0}^{n-1}X_{ij} (Y_i-X_i*W))
+W_j^{(t+1)}= W_j^{(t)} - \alpha\frac{\partial L}{\partial W_j}\Big|_{W^{(t)}} = W_j^{(t)} + \frac{\alpha}{n}\sum_{i=0}^{n-1}X_{ij} (Y_i-X_i*W^{(t)})
 $$
 
 SGD:
 
 $$
-W_j^{(n+1)}= L - \alpha X_{ij} (Y_i-X_i*W)
+W_j^{(t+1)}= W_j^{(t)} + \alpha X_{ij} (Y_i-X_i*W^{(t)})
 $$
 
 MBGD:
 
 $$
-W_j^{(n+1)}= L - \alpha(\sum_{random \space choose \space some \space i \space from \space [0,n)} X_{ij} (Y_i-X_i*W))
+W_j^{(t+1)}= W_j^{(t)} + \frac{\alpha}{|B|}\sum_{i \in B} X_{ij} (Y_i-X_i*W^{(t)}) \\
+\text{where B is a random mini-batch from } [0,n)
 $$
+
+上标 $(t)$ 是迭代轮次，求和里的 $W^{(t)}$ 表示用当前这一轮的权重计算预测值。
 
 > 实验1：线性回归算法的具体实现(MBGD)：
 >
@@ -118,7 +121,7 @@ $$
 $$
 min \space l(W,B) 
 \\
-subject \space to \space ||w||^2 ≤ \theta
+subject \space to \space ||W||^2 ≤ \theta
 $$
 
 通常不限制B，小的θ意味着更强的正则项。
@@ -213,7 +216,7 @@ $$
 则:
 
 $$
-E[H_i^t] = E[\sum_j W_{i,j}^tH_j^{t-1}] = \sum_j E[w_{i,j}^t]E[H_j^{t-1}] = 0
+E[H_i^t] = E[\sum_j W_{i,j}^tH_j^{t-1}] = \sum_j E[W_{i,j}^t]E[H_j^{t-1}] = 0
 $$
 
 正向方差：
@@ -276,5 +279,71 @@ $$
 
 Xavier初始化策略有助于提升数值稳定性，适用于在 0 点附近近似恒等映射（f(0)=0 且 f'(0)=1）的激活函数，典型代表是 tanh。
 
-## 六、
+## 六、卷积神经网络CNN
+
+从全连接到卷积，需要先明白图片特征提取的一些原则：平移不变性和局部性。
+
+![从全连接到卷积](pics/5.png)
+
+很容易有：
+
+$$
+H_{i,j} = \sum_{k,l} W_{i,j,k,l}*X_{k,l} + bias
+$$
+
+令 k = i + a, l = j + b,V是W的重新索引，
+
+有：
+
+$$
+H_{i,j} = \sum_{a,b} V_{i,j,a,b}*X_{i+a,j+b} + bias
+$$
+
+由平移不变性（对一个局部图案：X 平移后，跟随图案的窗口内像素值不变；假设窗口在平移前后都完整；我们要求输出值也不变，只是位置跟着平移——要这对任意输入成立，权重必须不随位置变化），得：
+
+$$
+V_{i,j,a,b} = V_{a,b}
+$$
+
+推导里求和默认窗口总是完整的。真实场景中图像边缘处窗口可能缺了一块，实际做法（补零 padding）意味着边缘位置的"相对结构"被人为改了——严格来说补零会破坏完美的平移等变性，只是实践中影响小，大家接受了。想让等变性严格成立得用循环 padding（把图像当环面）。   
+
+由局部性，得：
+
+$$
+H_{i,j} = \sum_{a=-\Delta}^{\Delta} \sum_{b=-\Delta}^{\Delta} V_{a,b}*X_{i+a,j+b} + bias
+$$
+
+这其实严格意义上来说，是交叉相关，不是严格意义上的数学卷积。但由于核是学习出来的，翻转与否不影响表达能力，深度学习
+框架实现的其实都是交叉相关。
+
+如果考虑填充和步幅，则输出形状是：
+
+$$
+\lfloor (n_h-k_h+p_h+s_h)/s_h \rfloor × \lfloor (n_w-k_w+p_w+s_w)/s_w \rfloor
+$$
+
+如果再考虑多输入通道:
+
+$$
+X : c_i × n_h × n_w \\
+W : c_i × k_h × k_w \\
+b : \text{scalar} \\
+Y ：m_h × m_w \\
+Y = \sum_{i=1}^{c_i} (X_{i,,} ※ W_{i,,}) + b \\
+\text{where ※ is the convolution}
+$$
+
+如果再考虑多输出通道：
+
+$$
+X : c_i × n_h × n_w \\
+W : c_o × c_i × k_h × k_w \\
+b : c_o \\
+Y ：c_o × m_h × m_w \\
+Y_{j,,} = \sum_{i=1}^{c_i} (X_{i,,} ※ W_{j,i,,}) + b_j \\
+\text{where ※ is the convolution, } j = 1, \dots, c_o
+$$
+
+偏置的维度是 $c_o$——每个输出通道一个标量偏置 $b_j$，广播加到该通道整个 $m_h × m_w$ 的输出上。单输出通道时偏置就退化成一个标量 $b$。
+
 
