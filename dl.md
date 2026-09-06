@@ -164,7 +164,7 @@ dropout只在训练时对某些作用层发挥作用，推理时不发挥作用�
 
 > 实验3：Dropout的具体实现：
 >
->`/home/zane/sound/deep-learning/code/dropout/dropout.py`
+>`code/dropout/dropout.py`
 
 ## 五、数值稳定性
 
@@ -313,14 +313,21 @@ $$
 H_{i,j} = \sum_{a=-\Delta}^{\Delta} \sum_{b=-\Delta}^{\Delta} V_{a,b}*X_{i+a,j+b} + bias
 $$
 
-这其实严格意义上来说，是交叉相关，不是严格意义上的数学卷积。但由于核是学习出来的，翻转与否不影响表达能力，深度学习
-框架实现的其实都是交叉相关。
+这其实严格意义上来说，是交叉相关，不是严格意义上的数学卷积。但由于核是学习出来的，翻转与否不影响表达能力，深度学习框架实现的其实都是交叉相关。
+
+> 实验4：交叉相关的具体实现：
+>
+>`code/cnn/cross_correlation.py`
 
 如果考虑填充和步幅，则输出形状是：
 
 $$
 \lfloor (n_h-k_h+p_h+s_h)/s_h \rfloor × \lfloor (n_w-k_w+p_w+s_w)/s_w \rfloor
 $$
+
+> 实验5：填充和步幅的具体实现：
+>
+>`code/cnn/padding_and_stride.py`
 
 如果再考虑多输入通道:
 
@@ -469,4 +476,9 @@ $$
 $$
 O(c_o × c_i × k_h × k_w × m_h × m_w)
 $$
+
+> 实验6：多输入通道和多输出通道的具体实现：
+>
+>`code/cnn/multi_input_and_output_channels.py`
+
 
