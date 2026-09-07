@@ -499,7 +499,9 @@ $$
 
 LeNet:
 
-
+> 实验9：LeNet的具体实现：
+>
+>`code/cnn/lenet.py`
 
 
 
