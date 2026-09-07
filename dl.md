@@ -509,3 +509,21 @@ AlexNet:
 >
 >`code/cnn/alexnet.py`
 
+VGG:
+
+> 实验11：VGG的具体实现：
+>
+>`code/cnn/vgg.py`
+
+NiN:
+
+> 实验12：NiN的具体实现：
+>
+>`code/cnn/nin.py`
+
+GoogLeNet:
+
+> 实验13：GoogLeNet的具体实现：
+>
+>`code/cnn/googlenet.py`
+
