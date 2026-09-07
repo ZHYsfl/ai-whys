@@ -527,3 +527,7 @@ GoogLeNet:
 >
 >`code/cnn/googlenet.py`
 
+## 七、批量归一化Batch Normalization
+
+
+
