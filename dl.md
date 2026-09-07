@@ -529,5 +529,33 @@ GoogLeNet:
 
 ## 七、批量归一化Batch Normalization
 
+为了加速学习，我们可以计算小批量里面特征维度的（全连接层是特征维度，卷积层是通道维度）均值和方差：
 
+$$
+\mu_B = \frac{1}{|B|}\sum_{i∈B} x_i \text{ and } \sigma_B^2 = \frac{1}{|B|}\sum_{i∈B} (x_i-\mu_B)^2 + \epsilon
+$$
+
+然后再做额外的调整（可学习的参数γ和β）：
+
+$$
+x_{i+1} = \gamma \frac{x_i-\mu_B}{\sigma_B} + \beta
+$$
+
+批量归一化层的作用位置是：
+
+1.全连接层和卷积层的输出后，激活函数前
+2.全连接层和卷积层输入前
+
+对全连接层，作用在特征维，对卷积层，作用在通道维。
+
+最初该方法的论文是用它来减少内部协变量转移，但后续有论文指出他可能就是通过在每个小批量里加入噪音来控制模型复杂度，因此没必要和dropout混合使用。
+
+该方法固定一小批量中的均值和方差，然后学习出适合的偏移和缩放，可以加速收敛速度，但一般不改变模型的精度。
+
+> 实验14：Batch Normalization的具体实现：
+>
+>`code/batch_normalization/batch_normalization_low_level.py`
+>`code/batch_normalization/batch_normalization_high_level.py`
+
+## 八、ResNet
 

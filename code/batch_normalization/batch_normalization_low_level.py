@@ -50,18 +50,22 @@ class BatchNorm(nn.Module):
 
 if __name__ == '__main__':
     net = torch.nn.Sequential(
+        # BatchNorm(1, num_dims=4),
         nn.Conv2d(1, 6, kernel_size=5),
         BatchNorm(6, num_dims=4), 
         nn.Sigmoid(), 
-        nn.MaxPool2d(kernel_size=2, stride=2), 
+        nn.MaxPool2d(kernel_size=2, stride=2),
+        # BatchNorm(6, num_dims=4), 
         nn.Conv2d(6, 16, kernel_size=5), 
         BatchNorm(16, num_dims=4),
         nn.Sigmoid(),
         nn.MaxPool2d(kernel_size=2, stride=2),
         nn.Flatten(),
+        # BatchNorm(16 * 4 * 4, num_dims=2),
         nn.Linear(16 * 4 * 4, 120), 
         BatchNorm(120, num_dims=2),
         nn.Sigmoid(),
+        # BatchNorm(120, num_dims=2),
         nn.Linear(120, 84),
         BatchNorm(84, num_dims=2),
         nn.Sigmoid(),
