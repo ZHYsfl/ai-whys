@@ -22,19 +22,19 @@ if __name__ == '__main__':
     print(pool2d(X)) #  the input shape is (batch_size, channels, height, width)
 
     pool2d = nn.MaxPool2d(3,padding=1,stride=2)
-    # (4-3+2*1+2)/2 = 2, so the output shape is (1,1,2,2)
+    # (4-3+2*1)/2+1 = 2, so the output shape is (1,1,2,2)
     print(pool2d(X))
 
 
     pool2d = nn.MaxPool2d((2,3),padding=(1,1),stride=(2,3))
-    # (4-2+2*1+2)/2 = 3, (4-3+2*1+3)/3 = 2, so the output shape is (1,1,3,2)
+    # (4-2+2*1)/2+1 = 3, (4-3+2*1)/3+1 = 2, so the output shape is (1,1,3,2)
     print(pool2d(X))
 
     X = torch.cat((X,X+1),dim=1) # concatenate along the channel dimension
     print(X.shape) # (1,2,4,4)
 
     pool2d = nn.MaxPool2d(3,padding=1,stride=2)
-    # (4-3+2*1+2)/2 = 2, so the output shape is (1,2,2,2)
+    # (4-3+2*1)/2+1 = 2, so the output shape is (1,2,2,2)
     print(pool2d(X))
 
     

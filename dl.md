@@ -319,11 +319,13 @@ $$
 >
 >`code/cnn/cross_correlation.py`
 
-如果考虑填充p(一侧的加和)和步幅，则输出形状是：
+如果考虑填充和步幅，则输出形状是：
 
 $$
 \lfloor (n_h-k_h+p_h+s_h)/s_h \rfloor × \lfloor (n_w-k_w+p_w+s_w)/s_w \rfloor
 $$
+
+注意这里的 $p_h$ 是两侧填充的**总行数**（大约一半在顶部、一半在底部），对应 PyTorch 里 `padding` 参数（单侧）的 2 倍。用 PyTorch 的单侧记法 $P$ 写就是 $\lfloor (n+2P-K)/S \rfloor + 1$，两者等价，不要混用。
 
 > 实验5：填充和步幅的具体实现：
 >
@@ -492,6 +494,10 @@ $$
 > 实验8：池化层的具体实现：
 >
 >`code/cnn/polling.py`
+
+来看几个出名的卷积神经网络吧！
+
+LeNet:
 
 
 
