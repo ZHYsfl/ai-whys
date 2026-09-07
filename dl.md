@@ -503,5 +503,9 @@ LeNet:
 >
 >`code/cnn/lenet.py`
 
+AlexNet:
 
+> 实验10：AlexNet的具体实现：
+>
+>`code/cnn/alexnet.py`
 
