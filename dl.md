@@ -597,7 +597,9 @@ $$
 
 > 实验16：数据并行的具体实现：
 >
->`code/multi_gpu_training/multi_gpu_training.py`
+>`code/multi_gpu_training/multi_gpu_training_low_level.py`
+>
+>`code/multi_gpu_training/multi_gpu_training_high_level.py`
 
 模型并行：将模型分成n块，每个GPU拿到一块模型计算它的前向和方向结果。通常用于模型大到单GPU放不下。一般用在超大模型上。
 
