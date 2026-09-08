@@ -28,7 +28,7 @@ def get_dataloader_workers():
 def main():
     train_iter = data.DataLoader(mnist_train, batch_size, shuffle=True, num_workers=get_dataloader_workers())
 
-    # 预热一轮，排除 worker 启动开销
+    # warm up one round to exclude the time of starting workers
     for X, y in train_iter:
         break
 
