@@ -559,3 +559,32 @@ $$
 
 ## 八、ResNet
 
+y = f(x) + x
+
+使用这个可以稳定训练出超级深的网络，原因：
+
+$$
+y = f(x) \\
+w = w - \alpha \frac{\partial y}{\partial w}
+$$
+
+$$
+y' = g(f(x)) \\
+\frac{\partial y'}{\partial w} = \frac{\partial y'}{\partial y} \frac{\partial y}{\partial w} \\
+\text{often the }\frac{\partial y'}{\partial y} \text{ is very small}
+$$
+
+若
+
+$$
+y'' = f(x) + g(f(x)) = y + y' \\
+\frac{\partial y''}{\partial w} = \frac{\partial y}{\partial w} +\frac{\partial y'}{\partial w} = (1+ \frac{\partial y'}{\partial y} )\frac{\partial y}{\partial w}
+\\
+\text{often the 1+}\frac{\partial y'}{\partial y} \text{ is stable enough}
+$$
+
+> 实验15：ResNet的具体实现：
+>
+>`code/resnet/resnet.py`
+
+## 九、
