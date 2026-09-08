@@ -9,10 +9,10 @@ def resnet18(num_classes, in_channels=1):
         blk = []
         for i in range(num_residuals):
             if i == 0 and not first_block:
-                blk.append(d2l.Residual(in_channels, out_channels,
+                blk.append(d2l.Residual(out_channels,
                                         use_1x1conv=True, strides=2))
             else:
-                blk.append(d2l.Residual(out_channels, out_channels))
+                blk.append(d2l.Residual(out_channels))
         return nn.Sequential(*blk)
 
     # 该模型使用了更小的卷积核、步长和填充，而且删除了最大汇聚层
