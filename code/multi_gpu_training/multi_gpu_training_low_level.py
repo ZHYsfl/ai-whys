@@ -111,5 +111,5 @@ if __name__ == "__main__":
     # print('load info',devices)
     # print('output:',split)
 
-    train(num_gpus=1, batch_size=256, lr=0.2,params=params,loss = loss)
+    train(num_gpus=1, batch_size=256, lr=0.1,params=params,loss = loss)
     # train(num_gpus=2, batch_size=256*2, lr=0.2,params=params,loss = loss)
