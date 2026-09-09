@@ -659,3 +659,6 @@ $$
 x_t = p(x_t|h_t)
 $$
 
+> 实验17：序列模型的具体实现：
+>
+>`code/sequence_model/sequence_model.py`
