@@ -662,3 +662,8 @@ $$
 > 实验17：序列模型的具体实现：
 >
 >`code/sequence_model/sequence_model.py`
+
+> 实验18：文本预处理的具体实现：
+>
+>`code/sequence_model/text_pre_process.py`
+
