@@ -71,7 +71,7 @@ def load_corpus_time_machine(max_tokens=-1):
     return corpus, vocab
 
 if __name__ == '__main__':
-    lines = read_time_machine()
+    # lines = read_time_machine()
     # print(lines[0])
     # print(lines[10])
 
