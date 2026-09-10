@@ -736,3 +736,10 @@ $$
 
 ![齐普夫定律](pics/zipf_law_loglog.png)
 
+> 实验19：齐普夫定律的验证：
+>
+>`code/nlp/zipf_law_loglog.py`
+
+> 实验20：文本序列数据的准备：
+>
+>`code/nlp/seqdataloader.py`

@@ -48,5 +48,3 @@ if __name__ == "__main__":
     plot_zipf_law({'unigram': vocab, 'bigram': bigram_vocab,
                    'trigram': trigram_vocab, 'quadgram': quadgram_vocab},
                   os.path.join(PICS_DIR, 'zipf_law_loglog.png'))
-
-    
