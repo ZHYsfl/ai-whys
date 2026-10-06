@@ -744,5 +744,72 @@ $$
 >
 >`code/nlp/seqdataloader.py`
 
-## 十一、RNN
+## 十一、循环神经网络RNN
+
+循环神经网络的输出取决于当下输入和前一时间的隐变量。
+
+![rnn](pics/11.png)
+
+$H_t$或$H_{t-1}$为形状为(batch_size,hidden_size)的张量，代表状态。
+
+$W_{hh}$为形状为(hidden_size,hidden_size)的张量。
+
+X为形状为(num_steps,batch_size,vocab_size)的张量。$X_t$为形状为(batch_size,vocab_size)的张量。
+
+$W_{xh}$为形状为(vocab_size,hidden_size)的张量。
+
+$B_h$为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
+
+$W_{ho}$为形状为(hidden_size,vocab_size)的张量。
+
+$B_o$为形状为(1,vocab_size)的张量，公式里通过广播和其他张量相加。
+
+
+则rnn的公式是：
+
+更新隐藏状态：
+
+$$
+H_t = f(H_{t-1}W_{hh}+X_tW_{xh}+B_h)
+$$
+
+其中f函数常见为tanh。
+
+输出：
+
+$$
+O_t = H_tW_{ho}+B_o
+$$
+
+$O_t$ 为 logits，经 softmax 后才是概率；实际计算中 softmax并入交叉熵损失。
+
+困惑度(perplexity)是衡量一个语言模型的好坏的指标。1表示完美，无穷大是最差情况。
+
+有平均交叉熵：
+
+$$
+\pi = \frac{1}{n}\sum_{t=1}^{n}-logp(x_t|x_{t-1},...) 
+$$
+
+p是语言模型的预测概率，$x_t$是真实词。
+
+有困惑度：
+
+$$
+perplexity = exp(\pi)
+$$
+
+梯度裁剪：迭代过程中计算T个时间步上的梯度，在反向传播过程中产生长度为O(T)的矩阵乘法链，导致数值不稳定，梯度裁剪能有效预防梯度爆炸，如果梯度长度超过θ,那么缩放为长度θ：
+
+$$
+g ← min(1,\frac{\theta}{||g||})\mathbf{g}
+$$
+
+应用到语言模型中时，循环神经网络根据当前词预测下一时刻词。
+
+> 实验21: rnn的具体实现：
+>
+>`code/nlp/rnn_low_level.py`
+>
+>`code/nlp/rnn_high_level.py`
 
