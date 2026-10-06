@@ -894,3 +894,8 @@ O_t = H_tW_{hq}+b_q
 $$
 
 双向循环神经网络通过反向更新的隐藏层来利用方向时间信息，通常用来对序列抽取特征、填空，而不是预测未来。
+
+> 实验24: bidirectional_rnn的错误使用案例：
+>
+>`code/nlp/bidirectional_rnn_in_wrong_scene.py`
+
