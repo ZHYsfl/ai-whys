@@ -750,20 +750,19 @@ $$
 
 ![rnn](pics/11.png)
 
-$H_t$或$H_{t-1}$为形状为(batch_size,hidden_size)的张量，代表状态。
+- $H_t$或$H_{t-1}$为形状为(batch_size,hidden_size)的张量，代表状态。
 
-$W_{hh}$为形状为(hidden_size,hidden_size)的张量。
+- $W_{hh}$为形状为(hidden_size,hidden_size)的张量。
 
-X为形状为(num_steps,batch_size,vocab_size)的张量。$X_t$为形状为(batch_size,vocab_size)的张量。
+- X为形状为(num_steps,batch_size,vocab_size)的张量。$X_t$为形状为(batch_size,vocab_size)的张量。
 
-$W_{xh}$为形状为(vocab_size,hidden_size)的张量。
+- $W_{xh}$为形状为(vocab_size,hidden_size)的张量。
 
-$B_h$为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
+- $B_h$为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
 
-$W_{ho}$为形状为(hidden_size,vocab_size)的张量。
+- $W_{ho}$为形状为(hidden_size,vocab_size)的张量。
 
-$B_o$为形状为(1,vocab_size)的张量，公式里通过广播和其他张量相加。
-
+- $B_o$为形状为(1,vocab_size)的张量，公式里通过广播和其他张量相加。
 
 则rnn的公式是：
 
@@ -812,4 +811,39 @@ $$
 >`code/nlp/rnn_low_level.py`
 >
 >`code/nlp/rnn_high_level.py`
+
+## 十二、门控循环单元GRU
+
+![gru](pics/12.png)
+
+我们发现一个徐丽不是每个观测值都是同等重要的，想只记住相关的观察需要：能关注的机制（更新门）和能遗忘的机制（重置门）。
+
+- $W_{xr}$或$W_{xz}$或$W_{xh}$为形状为(vocab_size,hidden_size)的张量。
+
+- $W_{hr}$或$W_{hz}$或$W_{hh}$为形状为(hidden_size,hidden_size)的张量。
+
+- $B_r$或$B_z$或$B_h$为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
+
+- X为形状为(num_steps,batch_size,vocab_size)的张量。$X_t$为形状为(batch_size,vocab_size)的张量。
+
+- $H_t$或$H_{t-1}$或$R_t$或$Z_t$或$\tilde{H_t}$为形状为(batch_size,hidden_size)的张量。
+
+我们有GRU:
+
+$$
+R_t = \sigma(X_tW_{xr}+H_{t-1}W_{hr}+B_r) \\
+Z_t = \sigma(X_tW_{xz}+H_{t-1}W_{hz}+B_z) \\
+\tilde{H_t} = tanh(X_tW_{xh}+(R_t \odot H_{t-1})W_{hh}+B_h) \\
+H_t = Z_t \odot H_{t-1} + (1-Z_t) \odot \tilde{H_t}
+$$
+
+当Z=0，R=1，等价于RNN。
+
+这里公式忽略了输出的全连接层。
+
+> 实验22: gru的具体实现：
+>
+>`code/nlp/gru.py`
+
+## 十三、LSTM
 
