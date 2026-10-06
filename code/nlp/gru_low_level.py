@@ -3,6 +3,7 @@ from torch import nn
 from d2l import torch as d2l
 from seqdataloader import load_data_time_machine
 from rnn_low_level import RNNModelScratch,train_v3
+
 def get_params(vocab_size, num_hiddens, device):
     num_inputs = num_outputs = vocab_size
 

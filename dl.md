@@ -843,7 +843,25 @@ $$
 
 > 实验22: gru的具体实现：
 >
->`code/nlp/gru.py`
+>`code/nlp/gru_low_level.py`
+>
+>`code/nlp/gru_high_level.py`
 
-## 十三、LSTM
+## 十三、长短期记忆网络LSTM
 
+![lstm](pics/13.png)
+
+我们有LSTM:
+
+$$
+I_t = \sigma(X_tW_{xi}+H_{t-1}W_{hi}+B_i) \\
+F_t = \sigma(X_tW_{xf}+H_{t-1}W_{hf}+B_f) \\
+O_t = \sigma(X_tW_{xo}+H_{t-1}W_{ho}+B_o) \\
+\tilde{C_t} = tanh(X_tW_{xc}+H_{t-1}W_{hc}+B_c) \\
+C_t = F_t \odot C_{t-1} + I_t \odot \tilde{C_t} \\
+H_t = O_t \odot tanh(C_t)
+$$
+
+> 实验23: lstm的具体实现：
+>
+>`code/nlp/lstm.py`
