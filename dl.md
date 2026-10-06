@@ -882,3 +882,15 @@ $$
 >
 >`code/nlp/deep_lstm.py`
 
+关于双向循环神经网络，有：
+
+![Bidirectional RNN](pics/14.png)
+
+$$
+\overrightarrow{H_t}= f(X_tW_{xh}^{(f)}+\overrightarrow{H}_{t-1}W_{hh}^{(f)}+B_h^{(f)}) \\
+\overleftarrow{H_t}= f(X_tW_{xh}^{(b)}+\overleftarrow{H}_{t+1}W_{hh}^{(b)}+B_h^{(b)}) \\
+H_t = [\overrightarrow{H}_t,\overleftarrow{H}_t] \\
+O_t = H_tW_{hq}+b_q
+$$
+
+双向循环神经网络通过反向更新的隐藏层来利用方向时间信息，通常用来对序列抽取特征、填空，而不是预测未来。
