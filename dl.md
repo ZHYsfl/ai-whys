@@ -899,3 +899,13 @@ $$
 >
 >`code/nlp/bidirectional_lstm_in_wrong_scene.py`
 
+## 十四、
+
+> 实验25: 机器翻译数据集的加载：
+>
+>`code/nlp/machine_translation_dataset.py`
+
+> 实验26: 编码器-解码器架构的接口：
+>
+>`code/nlp/encoder_decoder.py`
+
