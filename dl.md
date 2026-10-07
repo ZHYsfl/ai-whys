@@ -1022,5 +1022,131 @@ $$
 
 当k=1,beam search等价于贪心搜索；k=n，beam search也不是穷举搜索；k=C,C只要是固定常数，就一定不是穷举搜索。
 
+## 十五、注意力机制
 
+动物需要在复杂环境下有效关注值得注意的点。心理学框架认为人类根据随意线索和不随意线索选择注意点。
 
+卷积、全连接、池化层都只考虑不随意线索。注意力机制则显式地考虑随意线索。
+
+随意线索被称之为查询query。
+
+每个输入是不随意线索key和一个值value的对。通过注意力池化层来有偏向性地选择某些输入。
+
+注意力在统计历史上早有来源：
+
+非参注意力池化层：
+
+给定数据
+
+$$
+(x_i,y_i),i=1,...,n
+$$
+
+平均池化是最简单的方案：
+
+$$
+f(x) = \frac{1}{n}\sum_i y_i
+$$
+
+更好的方案是60年代提出来的Nadaraya-Watson核回归：
+
+$$
+f(x) = \sum_{i=1}^{n}\frac{K(x-x_i)}{\sum_{j=1}^{n}K(x-x_j)}y_i \\
+\text{where the Query is }x\\
+\text{ the Key is }x_i\\
+\text{ the Value is }y_i\\
+\text{ the Attention Weights is }\frac{K(x-x_i)}{\sum_{j=1}^{n}K(x-x_j)}\\
+\text{ the Output is }f(x)\\
+$$
+
+使用高斯核：
+
+$$
+K(u) = \frac{1}{\sqrt{2\pi}}exp(-\frac{u^2}{2})
+$$
+
+那么
+
+$$
+f(x) = \sum_{i=1}^{n}\frac{exp(-\frac{1}{2}(x-x_i)^2)}{\sum_{j=1}^{n}exp(-\frac{1}{2}(x-x_j)^2)}y_i \\
+= \sum_{i=1}^nsoftmax(-\frac{1}{2}(x-x_i)^2)y_i
+$$
+
+加上可以学习的参数w，则参数化的注意力机制：
+
+$$
+f(x) = \sum_{i=1}^nsoftmax(-\frac{1}{2}((x-x_i)w)^2)y_i
+$$
+
+注意力机制中，通过query(随机线索)和key(不随意线索)来有偏向性的选择输入。可一般写作：
+
+$$
+f(x) = \sum_i \alpha(x,x_i)y_i \\
+\text{where }\alpha(x,x_i)\text{ is the attention weight} 
+$$
+
+> 实验28: 无参注意力机制的实现：
+>
+>`code/nlp/nadaraya_watson.py`
+
+扩展到高维度，假设
+
+$$
+\text{one query }q ∈ R^q \\
+\text{m对 } key-value (k_1,v_1),(k_2,v_2),...,(k_m,v_m) \\
+k_i ∈ R^k,v_i ∈ R^v
+$$
+
+则注意力池化层为：
+
+$$
+f(q,(k_1,v_1),...,(k_m,v_m)) = \sum_{i=1}^{m}\alpha(q,k_i)v_i ∈ R^v
+\\
+\alpha(q,k_i) = softmax(a(q,k_i)) ∈ R
+$$
+
+我们注意到可以改动的就是attention score部分（query和key的相似度）：
+
+![attention](pics/19.png)
+
+常见的attention score function就是：
+
+1.Additive Attention:
+
+可学参数：
+
+$$
+W_k ∈ R^{h×k},W_q ∈ R^{h×q},v ∈ R^h
+\\
+a(k,q) = v^T tanh(W_kk+w_qq) 
+$$
+
+等价于将key和value合并起来后放入到一个隐藏大小为h，输出大小为1的单隐藏层MLP。
+
+2.Scaled Dot-Product Attention
+
+如果query和key都是同样的长度：
+
+$$
+q,k_i ∈ R^d
+$$
+
+那么：
+
+$$
+a(q,k_i) = <q,k_i>/\sqrt{d}
+$$
+
+上升到一般的向量化Attention表示：
+
+$$
+Q ∈ R^{n×d},K ∈ R^{m×d}, ∈ R^{m×v}
+\\
+a(Q,K) = QK^T/\sqrt{d} ∈ R^{n×m}
+\\
+f = softmax(a(Q,K))V ∈ R^{n×v}
+$$
+
+> 实验29: 两种Attention Score Function的实现：
+>
+>`code/nlp/attention_score.py`
