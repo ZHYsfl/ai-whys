@@ -899,7 +899,7 @@ $$
 >
 >`code/nlp/bidirectional_lstm_in_wrong_scene.py`
 
-## 十四、
+## 十四、序列到序列学习seq2seq
 
 > 实验25: 机器翻译数据集的加载：
 >
@@ -909,3 +909,8 @@ $$
 >
 >`code/nlp/encoder_decoder.py`
 
+
+
+> 实验27: seq2seq的实现：
+>
+>`code/nlp/seq2seq.py`
