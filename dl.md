@@ -1200,3 +1200,21 @@ P_{i,2j} = sin(\frac{i}{10000^{2j/d}})
 P_{i,2j+1} = cos(\frac{i}{10000^{2j/d}})
 $$
 
+## 十六、Transformer
+
+和使用注意力的seq2seq不同，Transformer是纯基于注意力。
+
+多头注意力(对统一key,value,query,希望抽取不同的信息)：
+
+![multi head attention](pics/21.png)
+
+多头注意力使用h个独立的注意力池化，合并各个头输出得到最终输出。
+
+Layer Normalization：
+
+![layer normalization](pics/22.png)
+
+transformer:
+
+![transformer](pics/23.png)
+
