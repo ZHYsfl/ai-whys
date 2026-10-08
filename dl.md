@@ -1210,6 +1210,10 @@ $$
 
 多头注意力使用h个独立的注意力池化，合并各个头输出得到最终输出。
 
+> 实验31: 多头注意力的实现：
+>
+>`code/nlp/multi_head_attention.py`
+
 Layer Normalization：
 
 ![layer normalization](pics/22.png)
@@ -1217,4 +1221,5 @@ Layer Normalization：
 transformer:
 
 ![transformer](pics/23.png)
+
 
