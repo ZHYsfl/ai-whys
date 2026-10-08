@@ -158,7 +158,7 @@ def predict_seq2seq(net, src_sentence, src_vocab, tgt_vocab, num_steps,
         Y, dec_state = net.decoder(dec_X, dec_state)
         # 取最后时间步的输出词元
         dec_X = Y.argmax(dim=2)  # (batch_size, num_steps, vocab_size) → (batch_size, num_steps)
-        pred = dec_X.squeeze(dim=0).type(torch.int32).item() # (batch_size=1, num_steps=1) → (batch_size=1,) -> int
+        pred = dec_X.squeeze(dim=0).type(torch.int32).item() # (batch_size=1, num_steps=1) → (num_steps=1,) -> int
         # 保存注意力权重
         if save_attention_weights:
             # Save attention weights (to be covered later)   ← 以后才讲  
