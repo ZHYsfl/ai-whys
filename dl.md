@@ -1151,8 +1151,22 @@ $$
 >
 >`code/nlp/attention_score.py`
 
+注意力机制在seq2seq的应用：
+
 ![attention_in_seq2seq](pics/20.png)
 
-> 实验30: 两种Attention Score Function的实现：
+编码器对每次词的输出作为key和value(它们相同)，解码器RNN对上一个词的输出是query（最开始没输出的时候用解码器最后一层的以后一步的输出），注意力的输出和下一个词的词嵌入合并进入RNN。注意力机制可以根据解码器RNN的输出来匹配到合适的编码器RNN的输出来更有效地传递信息。
+
+> 实验30: 注意力机制在seq2seq的应用：
 >
->`code/nlp/attention_score.py`
+>`code/nlp/bahdanau_attention.py`
+
+下面讲解自注意力。
+
+| | CNN | RNN | 自注意力 |
+| :--- | :---: | :---: | :---: |
+| **计算复杂度** | $O(knd^2)$ | $O(nd^2)$ | $O(n^2d)$ |
+| **并行度** | $O(n)$ | $O(1)$ | $O(n)$ |
+| **最长路径** | $O(n/k)$ | $O(n)$ | $O(1)$ |
+| **长距离依赖** | 需堆叠层数 | 严重遗忘 | 完美捕捉 |
+
