@@ -28,6 +28,10 @@ class MultiHeadAttention(nn.Module):
 
         # output: (batch_size * num_heads, no. of queries, num_hiddens / num_heads)
         output = self.attention(queries, keys, values, valid_lens)
+        # 把注意力权重暴露到MHA这一层（d2l原书是让调用方穿透两层去取，
+        # 这里在MHA上存一份，transformer.py里 blk.attention.attention_weights 即可取到）；
+        # 形状 (batch_size * num_heads, num_queries, num_kv)，绘图时再按head拆开
+        self.attention_weights = self.attention.attention_weights
 
         # output_concat: (batch_size, no. of queries, num_hiddens)
         output_concat = self.transpose_output(output, self.num_heads)
