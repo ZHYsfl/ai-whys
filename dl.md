@@ -1151,3 +1151,8 @@ $$
 >
 >`code/nlp/attention_score.py`
 
+![attention_in_seq2seq](pics/20.png)
+
+> 实验30: 两种Attention Score Function的实现：
+>
+>`code/nlp/attention_score.py`
