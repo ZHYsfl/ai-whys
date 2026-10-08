@@ -163,7 +163,7 @@ if __name__ == "__main__":
     # print('BatchNorm1d:', bn(X))
 
     num_hiddens, num_layers, dropout, batch_size, num_steps = 32, 2, 0.1, 2, 100
-    lr, num_epochs, device = 0.005, 250, d2l.try_gpu()
+    lr, num_epochs, device = 0.005, 50, d2l.try_gpu()
     ffn_num_input, ffn_num_hiddens, num_heads = 32, 64, 4
     key_size, query_size, value_size = 32, 32, 32
     norm_shape = [32]

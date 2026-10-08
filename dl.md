@@ -1222,4 +1222,7 @@ transformer:
 
 ![transformer](pics/23.png)
 
+> 实验32: transformer的实现：
+>
+>`code/nlp/transformer.py`
 
