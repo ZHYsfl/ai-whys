@@ -229,4 +229,61 @@ $$
 >
 >`code/reinforce/reinforce.py`
 
-## 五、
+## 五、Actor-Critic
+
+REINFORCE 的代数缺陷是什么？
+
+REINFORCE的更新公式是：
+
+$$
+\text{Loss} = - \log \pi_\theta(A_t|S_t) \cdot G_t 
+$$
+
+这里的 $G_t$ 是一条完整轨迹跑出来的真实回报（蒙特卡洛）。
+
+-   **高方差**：如果这一步动作是对的，但后面运气不好拿了负分，$G_t$ 是负的，你的网络就会惩罚这个“正确”的动作。
+-   **必须跑完一局**：必须跑到 `done=True` 才能算出 $G_t$ 去更新。
+-   **Online 死板**：数据用完即扔，太浪费。
+
+AC 真正弥补的，是 REINFORCE 的高方差（High Variance）和必须跑完一整个 Episode 才能更新这两个代数缺陷。
+
+![actor-critic](pics/28.png)
+
+我们之前在第一节推导过一个绝佳的替代品——**优势函数** $A_t$：
+
+$$
+A_\pi(S_t, A_t) = Q_\pi(S_t, A_t) - V_\pi(S_t) 
+$$
+
+在确定性环境下，它可以写成 TD Error 的形式：
+
+$$
+A_\pi(S_t, A_t) \approx R_{t+1} + \gamma V_\pi(S_{t+1}) - V_\pi(S_t) 
+$$
+
+$A_t$ 的物理意义是：“当前动作比平均水平$V$好多少”。它比 $G_t$ 的方差小得多。
+
+既然 $G_t$ 换成了 $A_t$，我们就需要两个网络：
+
+- **Actor（策略网络 $\pi_\theta$）**：负责选动作。它的 Loss 变成了：
+
+$$
+\text{Loss}_{actor} = - \log \pi_\theta(A_t|S_t) \cdot \text{detach}(A_t) 
+$$
+
+>*(注：必须 detach $A_t$，阻断梯度流入 Critic，否则计算图会爆炸)*
+
+- **Critic（价值网络 $V_w$）**：负责估计 $V_\pi(S)$。它的 Loss 就是标准的监督学习（均方误差）：
+
+$$
+\text{Loss}_{critic} = \text{MSE}(V_w(S_t), \underbrace{R_{t+1} + \gamma \text{detach}(V_w(S_{t+1}))}_{\text{TD Target}}) 
+$$
+
+>*(注：必须 detach $V_w(S_{t+1})$，阻断梯度流入 Actor，否则计算图会爆炸)*
+
+> 实验36: Actor-Critic 的实现：
+>
+>`code/actor_critic/actor_critic.py`
+
+## 六、PPO
+

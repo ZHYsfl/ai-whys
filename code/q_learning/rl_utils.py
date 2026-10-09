@@ -34,11 +34,13 @@ def train_on_policy_agent(env, agent, num_episodes):
             for i_episode in range(int(num_episodes/10)):
                 episode_return = 0
                 transition_dict = {'states': [], 'actions': [], 'next_states': [], 'rewards': [], 'dones': []}
-                state = env.reset()
+                state, _ = env.reset()  # gymnasium的reset返回(obs, info)二元组
                 done = False
                 while not done:
                     action = agent.take_action(state)
-                    next_state, reward, done, _ = env.step(action)
+                    # gymnasium的step返回5元组：done拆成了terminated(真结束)和truncated(超时截断)
+                    next_state, reward, terminated, truncated, _ = env.step(action)
+                    done = terminated or truncated
                     transition_dict['states'].append(state)
                     transition_dict['actions'].append(action)
                     transition_dict['next_states'].append(next_state)
@@ -59,11 +61,13 @@ def train_off_policy_agent(env, agent, num_episodes, replay_buffer, minimal_size
         with tqdm(total=int(num_episodes/10), desc='Iteration %d' % i) as pbar:
             for i_episode in range(int(num_episodes/10)):
                 episode_return = 0
-                state = env.reset()
+                state, _ = env.reset()  # gymnasium的reset返回(obs, info)二元组
                 done = False
                 while not done:
                     action = agent.take_action(state)
-                    next_state, reward, done, _ = env.step(action)
+                    # gymnasium的step返回5元组：done拆成了terminated(真结束)和truncated(超时截断)
+                    next_state, reward, terminated, truncated, _ = env.step(action)
+                    done = terminated or truncated
                     replay_buffer.add(state, action, reward, next_state, done)
                     state = next_state
                     episode_return += reward
