@@ -297,6 +297,8 @@ Actor-Critic 是 Online 的，跑完一局，立刻更新，用完就扔。这�
 
 **PPO 的补丁：Importance Sampling + Clip**:
 
+![ppo](pics/29.png)
+
 PPO 解决这个问题的纯代数方式极其暴力：
 - **第一步（Importance Sampling）**：在更新时，乘以一个比值 $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{old}(a_t|s_t)}$。这个比值相当于在数学上“强行纠正”过期数据的分布偏差。这样，你就能用旧数据 $\pi_{old}$ 跑出来的轨迹，反复更新当前的 $\pi_\theta$。
 - **第二步（Clip）**：但比值 $r_t$ 不能太大，否则梯度会爆炸。所以 PPO 加了一个强制约束：
