@@ -287,3 +287,186 @@ $$
 
 ## 六、PPO
 
+Actor-Critic 的痛点：
+
+Actor-Critic 是 Online 的，跑完一局，立刻更新，用完就扔。这太浪费了！
+
+能不能让这条轨迹的数据，多更新几次？
+
+**不行。** 因为只要你的策略 $\pi_\theta$ 更新了一点点，这条轨迹的数据分布就“过期”了，在数学上 $\mathbb{E}_{\pi_\theta}$ 就不再服从旧的数据分布，强行用会算错梯度。
+
+**PPO 的补丁：Importance Sampling + Clip**:
+
+PPO 解决这个问题的纯代数方式极其暴力：
+- **第一步（Importance Sampling）**：在更新时，乘以一个比值 $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{old}(a_t|s_t)}$。这个比值相当于在数学上“强行纠正”过期数据的分布偏差。这样，你就能用旧数据 $\pi_{old}$ 跑出来的轨迹，反复更新当前的 $\pi_\theta$。
+- **第二步（Clip）**：但比值 $r_t$ 不能太大，否则梯度会爆炸。所以 PPO 加了一个强制约束：
+
+$$
+ \text{Actor Loss} = - \min \left( r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t \right) 
+$$
+
+>（如果新策略和旧策略差得太远，Clip 机制就会把梯度切断，强迫它们“别离得太远”）。
+
+**这里推导一下Actor Loss：**
+
+首先，为什么 AC 的 Loss 里有 $\log \pi_\theta$？
+
+因为我们要最大化目标 $J(\theta)$，对策略参数 $\theta$ 求梯度后，根据策略梯度定理，得到：
+$$
+ \nabla_\theta J(\theta) = \mathbb{E}[\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot A_t] 
+$$
+为了让 PyTorch 自动求导引擎能算出这个梯度，我们在代码里拼凑了一个 Loss：
+$$
+ \text{Loss}_{actor} = - \log \pi_\theta(A_t|S_t) \cdot \text{detach}(A_t) 
+$$
+当 PyTorch 执行 `loss.backward()` 时，它会对 $\log \pi_\theta$ 求导，刚好得到 $\nabla_\theta \log \pi_\theta$，完美对应数学目标。
+
+那 PPO 是怎么把 $\log \pi_\theta$ “藏起来”的？
+
+PPO 为了能用旧策略 $\pi_{old}$ 的数据，引入了重要性采样比值：
+
+$$
+ r_t(\theta) = \frac{\pi_\theta(A_t|S_t)}{\pi_{old}(A_t|S_t)} 
+$$
+
+我们对 $r_t(\theta)$ 取对数：
+
+$$
+ \log r_t(\theta) = \log \pi_\theta - \log \pi_{old} 
+$$
+
+现在，我们对 $\theta$ 求梯度（注意，$\pi_{old}$ 是旧策略，里面**没有 $\theta$**，所以它是常数）：
+
+$$
+ \nabla_\theta \log r_t(\theta) = \nabla_\theta \log \pi_\theta - 0 = \nabla_\theta \log \pi_\theta 
+$$
+
+（看！$\log \pi_\theta$ 的梯度，就是 $r_t(\theta)$ 的对数梯度。）
+
+利用初中代数的链式法则（$\nabla f = f \cdot \nabla \log f$），我们可以推出一个极其漂亮的等式：
+
+$$
+ \nabla_\theta r_t(\theta) = r_t(\theta) \cdot \nabla_\theta \log r_t(\theta) = r_t(\theta) \cdot \nabla_\theta \log \pi_\theta 
+$$
+
+现在，把这个等式代入 PPO 的数学目标里。
+PPO 原本要最大化的目标梯度是：
+
+$$
+ \mathbb{E} \left[ \frac{\pi_\theta}{\pi_{old}} \nabla_\theta \log \pi_\theta \cdot A_t \right] 
+$$
+
+把 $\frac{\pi_\theta}{\pi_{old}}$ 替换成 $r_t(\theta)$：
+
+$$
+ \mathbb{E} \left[ r_t(\theta) \nabla_\theta \log \pi_\theta \cdot A_t \right] 
+$$
+
+把上面推导的等式代进去（$r_t(\theta) \nabla_\theta \log \pi_\theta = \nabla_\theta r_t(\theta)$）：
+
+$$
+ \mathbb{E} \left[ \nabla_\theta r_t(\theta) \cdot A_t \right] 
+$$
+
+反推 Loss，因为我们在数学上要算的梯度变成了 $\mathbb{E}[\nabla_\theta r_t(\theta) \cdot A_t]$，所以我们只需要在代码里拼凑出这样的 Loss：
+
+$$
+ \text{Loss}_{actor} = - r_t(\theta) \cdot \text{detach}(A_t) 
+$$
+
+这就是看到的 PPO Loss 里没有 $\log \pi_\theta$ 的原因。
+
+为了防止 $r_t(\theta)$ 太大（策略更新步子太猛），PPO 在 Loss 外面套了一个 `min` 和 `clip`：
+$$
+ \text{Actor Loss} = - \min \left( r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t \right) 
+$$
+
+**这里推导一下Critic Loss：**
+
+Critic（价值网络 $V_w$）的唯一使命是尽可能准确地拟合真实的 $V^\pi(S_t)$。它的 Loss 是标准的监督学习（均方误差）：
+
+$$ \text{Loss}_{critic} = \text{MSE}(V_w(S_t), \text{Target}) $$
+
+在 PPO 中，这个 $\text{Target}$ 到底怎么算？
+
+回忆优势函数的代数定义：
+
+$$ A_t = Q_t - V_t $$
+
+移项可得：
+
+$$ Q_t = V_t + A_t $$
+
+在 PPO 中，我们把这里的 $V_t$ 替换为**更新前的旧价值网络** $V_{old}(S_t)$，把 $A_t$ 替换为**广义优势估计** $\hat{A}_t^{GAE}$。于是，PPO 的 Critic Target 定义为：
+
+$$ \text{Target}_{PPO} = V_{old}(S_t) + \hat{A}_t^{GAE} $$
+
+我们算优势 $A_t$ 有两种极端做法：
+- **极端一（高方差，无偏）**：蒙特卡洛（REINFORCE）。$A_t = G_t - V(S_t)$。依靠完整的真实回报 $G_t$，随机性大。
+- **极端二（低方差，有偏）**：单步 TD Error（Actor-Critic）。$A_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$。依靠下一状态的估计，平稳但存在偏差。
+
+**GAE(广义优势估计) 的本质就是通过引入系数 $\lambda \in [0,1]$，在两者之间做平滑的代数插值。**
+
+首先定义单步 TD Error：
+
+$$ \delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t) $$
+
+GAE 的定义是将当前步和未来所有步的 $\delta$ 加权求和，权重为 $(\gamma \lambda)^l$：
+
+$$ \hat{A}_t^{GAE} = \sum_{l=0}^{\infty} (\gamma \lambda)^l \delta_{t+l} = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots $$
+
+**极限验证（纯代数展开）：**
+- **当 $\lambda = 0$ 时**：$\hat{A}_t^{GAE} = \delta_t$，退化为单步 AC 的优势。
+- **当 $\lambda = 1$ 时**：展开式子，中间的 $V$ 项会互相抵消（多米诺骨牌），最终得 $\hat{A}_t^{GAE} = G_t - V_t$，退化为 REINFORCE 的蒙特卡洛优势。
+
+GAE的工程实现--倒序计算与 Target 合并：在代码里，不可能去算无穷级数，利用递推关系：
+
+$$ \hat{A}_t^{GAE} = \delta_t + \gamma \lambda \hat{A}_{t+1}^{GAE} $$
+
+这完美对应了代码里的**倒序循环**：
+
+```python
+# 倒序计算，从最后一步往前推
+gae = 0
+for t in reversed(range(T)):
+    # 算单步 TD Error
+    delta = rewards[t] + gamma * next_values[t] * (1 - dones[t]) - values[t]
+    # 递推累加 GAE
+    gae = delta + gamma * lambda_ * gae
+    advantages[t] = gae
+```
+
+当把 $\hat{A}_t^{GAE}$ 代回 Target 公式时，我们来看看它的本质：
+如果 $\lambda=1$，代入后 $V_{old}$ 抵消：
+
+$$ \text{Target} = V_{old}(S_t) + (G_t - V_{old}(S_t)) = G_t $$
+
+在实际 PPO 里 $\lambda$ 通常取 0.95，这个 Target 就是“被 $V$ 估计平滑过的多步回报”，完美平衡了偏差与方差。
+
+综上，得：
+
+- **Actor（策略网络 $\pi_\theta$）**：负责选动作。它的 Loss 变成了：
+
+$$
+r_t(\theta) = \frac{\pi_\theta(A_t|S_t)}{\text{detach}(\pi_{old}(A_t|S_t))} \quad \text{（或代码实现形式：} \exp(\log \pi_\theta - \text{detach}(\log \pi_{old})) \text{）}
+$$
+
+$$
+\text{Loss}_{actor} = - \min \left( r_t(\theta) \cdot \text{detach}(\hat{A}_t^{GAE}), \ \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \cdot \text{detach}(\hat{A}_t^{GAE}) \right)
+$$
+
+>*(注1：必须 detach $\hat{A}_t^{GAE}$，阻断优势函数的梯度流入 Critic，否则计算图会爆炸)*
+>
+>*(注2：计算比值 $r_t(\theta)$ 时，分母 $\pi_{old}$ 产生的 log_prob 也必须 detach，因为它属于旧策略，不参与当前梯度的回流)*
+
+- **Critic（价值网络 $V_w$）**：负责估计 $V_\pi(S)$。它的 Loss 就是标准的监督学习（均方误差）：
+
+$$
+\text{Loss}_{critic} = \text{MSE}(V_w(S_t), \underbrace{\text{detach}(\hat{A}_t^{GAE}) + \text{detach}(V_w(S_t))}_{\text{PPO Target (Returns)}}) 
+$$
+
+>*(注：在计算 Critic Target 时，优势函数 $\hat{A}_t^{GAE}$ 和旧价值 $V_w(S_t)$ 都必须 detach，阻断梯度流入 Actor，否则计算图会爆炸——这能防止 Critic 陷入“自己预测自己”的追尾巴死循环)*
+
+> 实验37: PPO 的实现：
+>
+>`code/actor_critic/ppo.py`
