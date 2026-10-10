@@ -127,6 +127,7 @@ $$
 $$
 
 期望的展开式是：
+
 $$
 J(\theta) = \sum_{\tau} P(\tau|\theta) G(\tau) 
 $$
@@ -203,7 +204,7 @@ $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} [ \sum_{t=0}^T\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot G_t ] 
 $$
 
-下标的替换是因为：策略 $\pi_\theta$ 是决定轨迹分布 $P(\tau|\theta)$ 中唯一包含参数 $\theta$  的部分（环境转移 $P(S'|S,A)$ 和初始状态 $\rho_0$ 都不依赖 $\theta$ ）。所以，对轨迹分布求期望 $\mathbb{E}_{\tau{}\sim{}P(\cdot|\theta)}[\dots]$ ，在数学上就完全等价于对策略 $\pi_\theta$ 求期望 $\mathbb{E}_{\pi_\theta}[\dots]$ 。这两个符号指代的是同一个东西。
+下标的替换是因为：策略 $\pi_\theta$ 是决定轨迹分布 $P(\tau|\theta)$ 中唯一包含参数 $\theta$  的部分（环境转移 $P(S'|S,A)$ 和初始状态 $\rho_0$ 都不依赖 $\theta$ ）。所以，对轨迹分布求期望 $\mathbb E_{\tau{}\sim{}P(\cdot|\theta)}[\dots]$ ，在数学上就完全等价于对策略 $\pi_\theta$ 求期望 $\mathbb E_{\pi_\theta}[\dots]$ 。这两个符号指代的是同一个东西。
 
 我们不需要、也没法推出 J 本身。回到J的定义，其对所有可能的轨迹 τ 求和，轨迹的数量那就多了去了， J(θ) 的解析表达式是永远写不出来的。它在坐标系里是一个无穷维的怪物。J的梯度同理。但是我们可以跑一条轨迹，用单次采样（蒙特卡洛）来近似！
 
@@ -293,7 +294,7 @@ Actor-Critic 是 Online 的，跑完一局，立刻更新，用完就扔。这�
 
 能不能让这条轨迹的数据，多更新几次？
 
-**不行。** 因为只要你的策略 $\pi_\theta$ 更新了一点点，这条轨迹的数据分布就“过期”了，在数学上 $\mathbb{E}_{\pi_\theta}$ 就不再服从旧的数据分布，强行用会算错梯度。
+**不行。** 因为只要你的策略 $\pi_\theta$ 更新了一点点，这条轨迹的数据分布就“过期”了，在数学上 $\mathbb E_{\pi_\theta}$ 就不再服从旧的数据分布，强行用会算错梯度。
 
 **PPO 的补丁：Importance Sampling + Clip**:
 
@@ -314,13 +315,17 @@ $$
 首先，为什么 AC 的 Loss 里有 $\log{}\pi_\theta$ ？
 
 因为我们要最大化目标 $J(\theta)$ ，对策略参数 $\theta$ 求梯度后，根据策略梯度定理，得到：
+
 $$
  \nabla_\theta J(\theta) = \mathbb{E}[\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot A_t] 
 $$
+
 为了让 PyTorch 自动求导引擎能算出这个梯度，我们在代码里拼凑了一个 Loss：
+
 $$
  \text{Loss}_{actor} = - \log \pi_\theta(A_t|S_t) \cdot \text{detach}(A_t) 
 $$
+
 当 PyTorch 执行 `loss.backward()` 时，它会对 $\log{}\pi_\theta$ 求导，刚好得到 $\nabla_\theta{}\log{}\pi_\theta$ ，完美对应数学目标。
 
 那 PPO 是怎么把 $\log{}\pi_\theta$ “藏起来”的？
@@ -379,6 +384,7 @@ $$
 这就是看到的 PPO Loss 里没有 $\log{}\pi_\theta$ 的原因。
 
 为了防止 $r_t(\theta)$ 太大（策略更新步子太猛），PPO 在 Loss 外面套了一个 `min` 和 `clip`：
+
 $$
  \text{Actor Loss} = - \min \left( r_t(\theta) A_t, \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) A_t \right) 
 $$
@@ -439,6 +445,7 @@ for t in reversed(range(T)):
 ```
 
 当把 $\hat{A}_t^{GAE}$ 代回 Target 公式时，我们来看看它的本质：
+
 如果 $\lambda=1$ ，代入后 $V_{old}$ 抵消：
 
 $$ \text{Target} = V_{old}(S_t) + (G_t - V_{old}(S_t)) = G_t $$
