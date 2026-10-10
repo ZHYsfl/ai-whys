@@ -29,7 +29,7 @@ q-learning为什么有效的理论推导：
 有贝尔曼最优方程：
 
 $$
-Q^*(S_t,A)=R_{t+1}+\gamma\max_{A}Q^*(S_{t+1},A)
+Q^{*}(S_t,A)=R_{t+1}+\gamma\max_{A}Q^{*}(S_{t+1},A)
 $$
 
 带 $\alpha$ 的 q-learning 更新公式：
@@ -43,7 +43,7 @@ $$
 定义误差：
 
 $$
-e_t = Q_t - Q^*
+e_t = Q_t - Q^{*}
 $$
 
 我们的目标是看 $e_{t+1}$ 和 $e_t$ 的关系。
@@ -51,23 +51,23 @@ $$
 等式两边同时减去Q*：
 
 $$
-Q_{t+1}-Q^* = (1-\alpha)Q_t+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})] - Q^*
+Q_{t+1}-Q^{*} = (1-\alpha)Q_t+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})] - Q^{*}
 \\
-= (1-\alpha)(Q_t-Q^*)+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})-Q^*]
+= (1-\alpha)(Q_t-Q^{*})+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})-Q^{*}]
 $$
 
 带入贝尔曼最优方程：
 
 $$
-e_{t+1} = (1-\alpha)e_t + \alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})-(R_{t+1}+\gamma\max Q^*(S_{t+1}))]
+e_{t+1} = (1-\alpha)e_t + \alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})-(R_{t+1}+\gamma\max Q^{*}(S_{t+1}))]
 \\
-e_{t+1} = (1-\alpha)e_t+\alpha\gamma[\max Q_t(S_{t+1})-\max Q^*(S_{t+1})]
+e_{t+1} = (1-\alpha)e_t+\alpha\gamma[\max Q_t(S_{t+1})-\max Q^{*}(S_{t+1})]
 $$
 
 由于
 
 $$
-|\max Q_t - \max Q^*| \leq \max|Q_t - Q^*| = |e_t|
+|\max Q_t - \max Q^{*}| \leq \max|Q_t - Q^{*}| = |e_t|
 $$
 
 再由三角不等式，有：
