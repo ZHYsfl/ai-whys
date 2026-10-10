@@ -895,17 +895,17 @@ $$
 
 双向循环神经网络通过反向更新的隐藏层来利用方向时间信息，通常用来对序列抽取特征、填空，而不是预测未来。
 
-> 实验24: bidirectional_lstm的错误使用案例：
+> 实验25: bidirectional_lstm的错误使用案例：
 >
 >`code/nlp/bidirectional_lstm_in_wrong_scene.py`
 
 ## 十四、序列到序列学习seq2seq
 
-> 实验25: 机器翻译数据集的加载：
+> 实验26: 机器翻译数据集的加载：
 >
 >`code/nlp/machine_translation_dataset.py`
 
-> 实验26: 编码器-解码器架构的接口：
+> 实验27: 编码器-解码器架构的接口：
 >
 >`code/nlp/encoder_decoder.py`
 
@@ -939,7 +939,7 @@ $$
 
 核心思想是：惩罚**相较于翻译的参考答案**过短的预测、长匹配有更高权重。
 
-> 实验27: seq2seq的实现：
+> 实验28: seq2seq的实现：
 >
 >`code/nlp/seq2seq.py`
 
@@ -1085,7 +1085,7 @@ f(x) = \sum_i \alpha(x,x_i)y_i \\
 \text{where }\alpha(x,x_i)\text{ is the attention weight} 
 $$
 
-> 实验28: 无参注意力机制的实现：
+> 实验29: 无参注意力机制的实现：
 >
 >`code/nlp/nadaraya_watson.py`
 
@@ -1147,7 +1147,7 @@ a(Q,K) = QK^T/\sqrt{d} ∈ R^{n×m}
 f = softmax(a(Q,K))V ∈ R^{n×v}
 $$
 
-> 实验29: 两种Attention Score Function的实现：
+> 实验30: 两种Attention Score Function的实现：
 >
 >`code/nlp/attention_score.py`
 
@@ -1157,7 +1157,7 @@ $$
 
 编码器对每次词的输出作为key和value(它们相同)，解码器RNN对上一个词的输出是query（最开始没输出的时候用解码器最后一层的以后一步的输出），注意力的输出和下一个词的词嵌入合并进入RNN。注意力机制可以根据解码器RNN的输出来匹配到合适的编码器RNN的输出来更有效地传递信息。
 
-> 实验30: 注意力机制在seq2seq的应用：
+> 实验31: 注意力机制在seq2seq的应用：
 >
 >`code/nlp/bahdanau_attention.py`
 
@@ -1210,7 +1210,7 @@ $$
 
 多头注意力使用h个独立的注意力池化，合并各个头输出得到最终输出。
 
-> 实验31: 多头注意力的实现：
+> 实验32: 多头注意力的实现：
 >
 >`code/nlp/multi_head_attention.py`
 
@@ -1222,7 +1222,7 @@ transformer:
 
 ![transformer](pics/23.png)
 
-> 实验32: transformer的实现：
+> 实验33: transformer的实现：
 >
 >`code/nlp/transformer.py`
 

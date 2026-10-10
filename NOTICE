@@ -1,0 +1,27 @@
+foundation
+Copyright 2026 zane
+
+本文件列出本项目所包含的、来自上游项目的软件及其归属信息。
+随本项目再分发这些材料时，需保留相应的署名说明（见 LICENSE 第 4 条 (d)）。
+
+1. 《动手学深度学习》（Dive into Deep Learning, d2l）
+   - 原仓库：https://github.com/d2l-ai/d2l-zh
+   - 原协议：Creative Commons Attribution-ShareAlike 4.0 International（CC BY-SA 4.0）
+   - 官网：https://zh.d2l.ai
+   - 说明：code/ 下的深度学习代码（线性回归、softmax 回归、MLP、CNN、
+     ResNet、批归一化、dropout、RNN、注意力、Transformer 等）是在学习该书
+     的过程中改写自其配套代码，加入了大量中文注释与工程改进。
+
+2. 《动手学强化学习》（Hands-on Reinforcement Learning）
+   - 作者：张伟楠、沈键、俞勇
+   - 原仓库：https://github.com/boyu-ai/Hands-on-RL
+   - 原协议：Apache License 2.0
+   - 官网：https://hrl.boyuai.com
+   - 说明：code/ 下的强化学习代码（rl_utils、Q-learning、DQN、REINFORCE、
+     Actor-Critic、PPO 等）改写自该仓库，并迁移至 gymnasium 最新版 API。
+
+3. d2l PyPI 包
+   - https://pypi.org/project/d2l/
+   - 原协议：MIT-0（MIT No Attribution）
+   - 说明：运行依赖（未包含在本仓库中，由环境配置安装），
+     提供 d2l.Accumulator 等训练工具函数。
