@@ -1,7 +1,7 @@
 # ai-whys
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ZHYsfl/ai-whys/pulls)
 
 > 一个系统性的 AI 学习路线：**38 个实验、16 章笔记**，从线性回归到 Transformer、从 Q-learning 到 PPO，每个算法都从零实现，并讲清每个"为什么"。
 >
