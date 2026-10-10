@@ -1,4 +1,4 @@
-# foundation
+# ai-whys
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com)
@@ -111,7 +111,9 @@
 ## 运行环境
 
 - Python 3.14，推荐使用 [uv](https://docs.astral.sh/uv/) 管理虚拟环境
+- 安装依赖：`uv pip install -r requirements.txt`
 - 深度学习部分依赖 PyTorch；强化学习部分已迁移至 [gymnasium](https://gymnasium.farama.org/) 最新版 API
+- 注意：`d2l` 包对 torch/numpy 有较严格的版本 pin，若与已装的 PyTorch 冲突，改用 `uv pip install d2l --no-deps` 单独安装
 
 ## 许可证与致谢
 
