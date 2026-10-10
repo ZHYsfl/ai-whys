@@ -96,7 +96,7 @@ $$
 
 即：误差经过q-learning更新公式的迭代变小了。最终Q Table会收敛到最优动作价值。
 
-> 实验34: q-learning的实现：
+#### 实验34：q-learning的实现
 >
 >`code/q_learning/q_learning.py`
 
@@ -104,7 +104,7 @@ $$
 
 ![dqn](pics/26.png)
 
-> 实验35: DQN 的实现：
+#### 实验35：DQN 的实现
 >
 >`code/q_learning/dqn.py`
 
@@ -225,7 +225,7 @@ $$
 \theta = \theta + \alpha  \sum_{t=0}^T\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot G_t
 $$
 
-> 实验36: REINFORCE 的实现：
+#### 实验36：REINFORCE 的实现
 >
 >`code/reinforce/reinforce.py`
 
@@ -281,7 +281,7 @@ $$
 
 >*(注：必须 detach $V_w(S_{t+1})$，阻断梯度流入 Actor，否则计算图会爆炸)*
 
-> 实验37: Actor-Critic 的实现：
+#### 实验37：Actor-Critic 的实现
 >
 >`code/actor_critic/actor_critic.py`
 
@@ -469,6 +469,6 @@ $$
 
 >*(注：在计算 Critic Target 时，优势函数 $\hat{A}_t^{GAE}$ 和旧价值 $V_w(S_t)$ 都必须 detach，阻断梯度流入 Actor，否则计算图会爆炸——这能防止 Critic 陷入“自己预测自己”的追尾巴死循环)*
 
-> 实验38: PPO 的实现：
+#### 实验38：PPO 的实现
 >
 >`code/actor_critic/ppo.py`

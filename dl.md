@@ -63,7 +63,7 @@ $$
 
 上标 $(t)$ 是迭代轮次，求和里的 $W^{(t)}$ 表示用当前这一轮的权重计算预测值。
 
-> 实验1：线性回归算法的具体实现(MBGD)：
+#### 实验1：线性回归算法的具体实现(MBGD)
 >
 >`code/linear_regression/linreg_low_level.py`
 >
@@ -98,7 +98,7 @@ $$
 
 按照梯度下降法更新参数W即可。
 
-> 实验2：Softmax回归算法的具体实现(MBGD)：
+#### 实验2：Softmax回归算法的具体实现(MBGD)
 >
 >`code/softmax_regression/softmax_low_level.py`
 >
@@ -162,7 +162,7 @@ dropout只在训练时对某些作用层发挥作用，推理时不发挥作用�
 
 ![丢弃法dropout](pics/4.png)
 
-> 实验3：Dropout的具体实现：
+#### 实验3：Dropout的具体实现
 >
 >`code/dropout/dropout.py`
 
@@ -315,7 +315,7 @@ $$
 
 这其实严格意义上来说，是交叉相关，不是严格意义上的数学卷积。但由于核是学习出来的，翻转与否不影响表达能力，深度学习框架实现的其实都是交叉相关。
 
-> 实验4：交叉相关的具体实现：
+#### 实验4：交叉相关的具体实现
 >
 >`code/cnn/cross_correlation.py`
 
@@ -327,7 +327,7 @@ $$
 
 注意这里的 $p_h$ 是两侧填充的**总行数**（大约一半在顶部、一半在底部），对应 PyTorch 里 `padding` 参数（单侧）的 2 倍。用 PyTorch 的单侧记法 $P$ 写就是 $\lfloor (n+2P-K)/S \rfloor + 1$，两者等价，不要混用。
 
-> 实验5：填充和步幅的具体实现：
+#### 实验5：填充和步幅的具体实现
 >
 >`code/cnn/padding_and_stride.py`
 
@@ -369,7 +369,7 @@ $$
 (n_h×n_w,c_i)为输入的，权重参数为(c_o,c_i)的Linear(c_i,c_o)层
 $$
 
-> 实验6：1x1卷积的具体实现以及和全连接层等价的验证：
+#### 实验6：1x1卷积的具体实现以及和全连接层等价的验证
 >
 >`code/cnn/one_multiply_one_convolution.py`
 
@@ -483,7 +483,7 @@ $$
 O(c_o × c_i × k_h × k_w × m_h × m_w)
 $$
 
-> 实验7：多输入通道和多输出通道的具体实现：
+#### 实验7：多输入通道和多输出通道的具体实现
 >
 >`code/cnn/multi_input_and_output_channels.py`
 
@@ -491,7 +491,7 @@ $$
 
 池化层有两种：最大池化层和平均池化层。
 
-> 实验8：池化层的具体实现：
+#### 实验8：池化层的具体实现
 >
 >`code/cnn/polling.py`
 
@@ -499,31 +499,31 @@ $$
 
 LeNet:
 
-> 实验9：LeNet的具体实现：
+#### 实验9：LeNet的具体实现
 >
 >`code/cnn/lenet.py`
 
 AlexNet:
 
-> 实验10：AlexNet的具体实现：
+#### 实验10：AlexNet的具体实现
 >
 >`code/cnn/alexnet.py`
 
 VGG:
 
-> 实验11：VGG的具体实现：
+#### 实验11：VGG的具体实现
 >
 >`code/cnn/vgg.py`
 
 NiN:
 
-> 实验12：NiN的具体实现：
+#### 实验12：NiN的具体实现
 >
 >`code/cnn/nin.py`
 
 GoogLeNet:
 
-> 实验13：GoogLeNet的具体实现：
+#### 实验13：GoogLeNet的具体实现
 >
 >`code/cnn/googlenet.py`
 
@@ -552,7 +552,7 @@ $$
 
 该方法固定一小批量中的均值和方差，然后学习出适合的偏移和缩放，可以加速收敛速度，但一般不改变模型的精度。
 
-> 实验14：Batch Normalization的具体实现：
+#### 实验14：Batch Normalization的具体实现
 >
 >`code/batch_normalization/batch_normalization_low_level.py`
 >`code/batch_normalization/batch_normalization_high_level.py`
@@ -583,7 +583,7 @@ y'' = f(x) + g(f(x)) = y + y' \\
 \text{often the 1+}\frac{\partial y'}{\partial y} \text{ is stable enough}
 $$
 
-> 实验15：ResNet的具体实现：
+#### 实验15：ResNet的具体实现
 >
 >`code/resnet/resnet.py`
 
@@ -595,7 +595,7 @@ $$
 
 当一个模型能用单卡计算时，通常使用数据并行拓展到多卡上。
 
-> 实验16：数据并行的具体实现：
+#### 实验16：数据并行的具体实现
 >
 >`code/multi_gpu_training/multi_gpu_training_low_level.py`
 >
@@ -661,13 +661,13 @@ $$
 
 ![潜变量模型](pics/10.png)
 
-> 实验17：序列模型的具体实现：
+#### 实验17：序列模型的具体实现
 >
 >`code/nlp/sequence_model.py`
 
 在了解语言模型前，先学会文本预处理：
 
-> 实验18：文本预处理的具体实现：
+#### 实验18：文本预处理的具体实现
 >
 >`code/nlp/text_pre_process.py`
 
@@ -736,11 +736,11 @@ $$
 
 ![齐普夫定律](pics/zipf_law_loglog.png)
 
-> 实验19：齐普夫定律的验证：
+#### 实验19：齐普夫定律的验证
 >
 >`code/nlp/zipf_law_loglog.py`
 
-> 实验20：文本序列数据的准备：
+#### 实验20：文本序列数据的准备
 >
 >`code/nlp/seqdataloader.py`
 
@@ -806,7 +806,7 @@ $$
 
 应用到语言模型中时，循环神经网络根据当前词预测下一时刻词。
 
-> 实验21: rnn的具体实现：
+#### 实验21：rnn的具体实现
 >
 >`code/nlp/rnn_low_level.py`
 >
@@ -841,7 +841,7 @@ $$
 
 这里公式忽略了输出的全连接层。
 
-> 实验22: gru的具体实现：
+#### 实验22：gru的具体实现
 >
 >`code/nlp/gru_low_level.py`
 >
@@ -862,7 +862,7 @@ C_t = F_t \odot C_{t-1} + I_t \odot \tilde{C_t} \\
 H_t = O_t \odot tanh(C_t)
 $$
 
-> 实验23: lstm的具体实现：
+#### 实验23：lstm的具体实现
 >
 >`code/nlp/lstm.py`
 
@@ -878,7 +878,7 @@ $$
 
 深度循环神经网络使用多个隐藏层来获得更多的非线性性。
 
-> 实验24: 深度循环神经网络的具体实现：
+#### 实验24：深度循环神经网络的具体实现
 >
 >`code/nlp/deep_lstm.py`
 
@@ -895,17 +895,17 @@ $$
 
 双向循环神经网络通过反向更新的隐藏层来利用方向时间信息，通常用来对序列抽取特征、填空，而不是预测未来。
 
-> 实验25: bidirectional_lstm的错误使用案例：
+#### 实验25：bidirectional_lstm的错误使用案例
 >
 >`code/nlp/bidirectional_lstm_in_wrong_scene.py`
 
 ## 十四、序列到序列学习seq2seq
 
-> 实验26: 机器翻译数据集的加载：
+#### 实验26：机器翻译数据集的加载
 >
 >`code/nlp/machine_translation_dataset.py`
 
-> 实验27: 编码器-解码器架构的接口：
+#### 实验27：编码器-解码器架构的接口
 >
 >`code/nlp/encoder_decoder.py`
 
@@ -939,7 +939,7 @@ $$
 
 核心思想是：惩罚**相较于翻译的参考答案**过短的预测、长匹配有更高权重。
 
-> 实验28: seq2seq的实现：
+#### 实验28：seq2seq的实现
 >
 >`code/nlp/seq2seq.py`
 
@@ -1085,7 +1085,7 @@ f(x) = \sum_i \alpha(x,x_i)y_i \\
 \text{where }\alpha(x,x_i)\text{ is the attention weight} 
 $$
 
-> 实验29: 无参注意力机制的实现：
+#### 实验29：无参注意力机制的实现
 >
 >`code/nlp/nadaraya_watson.py`
 
@@ -1147,7 +1147,7 @@ a(Q,K) = QK^T/\sqrt{d} ∈ R^{n×m}
 f = softmax(a(Q,K))V ∈ R^{n×v}
 $$
 
-> 实验30: 两种Attention Score Function的实现：
+#### 实验30：两种Attention Score Function的实现
 >
 >`code/nlp/attention_score.py`
 
@@ -1157,7 +1157,7 @@ $$
 
 编码器对每次词的输出作为key和value(它们相同)，解码器RNN对上一个词的输出是query（最开始没输出的时候用解码器最后一层的以后一步的输出），注意力的输出和下一个词的词嵌入合并进入RNN。注意力机制可以根据解码器RNN的输出来匹配到合适的编码器RNN的输出来更有效地传递信息。
 
-> 实验31: 注意力机制在seq2seq的应用：
+#### 实验31：注意力机制在seq2seq的应用
 >
 >`code/nlp/bahdanau_attention.py`
 
@@ -1210,7 +1210,7 @@ $$
 
 多头注意力使用h个独立的注意力池化，合并各个头输出得到最终输出。
 
-> 实验32: 多头注意力的实现：
+#### 实验32：多头注意力的实现
 >
 >`code/nlp/multi_head_attention.py`
 
@@ -1222,7 +1222,7 @@ transformer:
 
 ![transformer](pics/23.png)
 
-> 实验33: transformer的实现：
+#### 实验33：transformer的实现
 >
 >`code/nlp/transformer.py`
 
