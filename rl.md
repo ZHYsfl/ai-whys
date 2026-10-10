@@ -271,7 +271,7 @@ $$
 \text{Loss}_{actor} = - \log \pi_\theta(A_t|S_t) \cdot \text{detach}(A_t) 
 $$
 
->*(注：必须 detach $A_t$ ，阻断梯度流入 Critic，否则计算图会爆炸)*
+>(注：必须 detach $A_t$ ，阻断梯度流入 Critic，否则计算图会爆炸)
 
 - **Critic（价值网络 $V_w$ ）**：负责估计 $V_\pi(S)$ 。它的 Loss 就是标准的监督学习（均方误差）：
 
@@ -279,7 +279,7 @@ $$
 \text{Loss}_{critic} = \text{MSE}(V_w(S_t), \underbrace{R_{t+1} + \gamma \text{detach}(V_w(S_{t+1}))}_{\text{TD Target}}) 
 $$
 
->*(注：必须 detach $V_w(S_{t+1})$ ，阻断梯度流入 Actor，否则计算图会爆炸)*
+>(注：必须 detach $V_w(S_{t+1})$ ，阻断梯度流入 Actor，否则计算图会爆炸)
 
 #### 实验37：Actor-Critic 的实现
 >
@@ -457,9 +457,9 @@ $$
 \text{Loss}_{actor} = - \min \left( r_t(\theta) \cdot \text{detach}(\hat{A}_t^{GAE}), \ \text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon) \cdot \text{detach}(\hat{A}_t^{GAE}) \right)
 $$
 
->*(注1：必须 detach $\hat{A}_t^{GAE}$ ，阻断优势函数的梯度流入 Critic，否则计算图会爆炸)*
+>(注1：必须 detach $\hat{A}_t^{GAE}$ ，阻断优势函数的梯度流入 Critic，否则计算图会爆炸)
 >
->*(注2：计算比值 $r_t(\theta)$ 时，分母 $\pi_{old}$ 产生的 log_prob 也必须 detach，因为它属于旧策略，不参与当前梯度的回流)*
+>(注2：计算比值 $r_t(\theta)$ 时，分母 $\pi_{old}$ 产生的 log_prob 也必须 detach，因为它属于旧策略，不参与当前梯度的回流)
 
 - **Critic（价值网络 $V_w$ ）**：负责估计 $V_\pi(S)$ 。它的 Loss 就是标准的监督学习（均方误差）：
 
@@ -467,7 +467,7 @@ $$
 \text{Loss}_{critic} = \text{MSE}(V_w(S_t), \underbrace{\text{detach}(\hat{A}_t^{GAE}) + \text{detach}(V_w(S_t))}_{\text{PPO Target (Returns)}}) 
 $$
 
->*(注：在计算 Critic Target 时，优势函数 $\hat{A}_t^{GAE}$ 和旧价值 $V_w(S_t)$ 都必须 detach，阻断梯度流入 Actor，否则计算图会爆炸——这能防止 Critic 陷入“自己预测自己”的追尾巴死循环)*
+>(注：在计算 Critic Target 时，优势函数 $\hat{A}_t^{GAE}$ 和旧价值 $V_w(S_t)$ 都必须 detach，阻断梯度流入 Actor，否则计算图会爆炸——这能防止 Critic 陷入“自己预测自己”的追尾巴死循环)
 
 #### 实验38：PPO 的实现
 >
