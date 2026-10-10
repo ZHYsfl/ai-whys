@@ -29,15 +29,15 @@ q-learning为什么有效的理论推导：
 有贝尔曼最优方程：
 
 $$
-Q^*(S_t,A)=R_{t+1}+γmax_{A}Q^*(S_{t+1},A)
+Q^*(S_t,A)=R_{t+1}+\gamma\max_{A}Q^*(S_{t+1},A)
 $$
 
-带α的q-learning更新公式：
+带 $\alpha$ 的 q-learning 更新公式：
 
 $$
-Q_{t+1}(S_t,A_t) = Q_t(S_t,A_t)+α[R_{t+1}+γmax_{A}Q_t(S_{t+1},A)-Q_t(S_t,A_t)]
+Q_{t+1}(S_t,A_t) = Q_t(S_t,A_t)+\alpha[R_{t+1}+\gamma\max_{A}Q_t(S_{t+1},A)-Q_t(S_t,A_t)]
 \\
-= (1-\alpha)Q_t+\alpha[R_{t+1}+\gamma maxQ_t(S_{t+1})]
+= (1-\alpha)Q_t+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})]
 $$
 
 定义误差：
@@ -51,41 +51,41 @@ $$
 等式两边同时减去Q*：
 
 $$
-Q_{t+1}-Q^* = (1-\alpha)Q_t+\alpha[R_{t+1}+\gamma maxQ_t(S_{t+1})] - Q^*
+Q_{t+1}-Q^* = (1-\alpha)Q_t+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})] - Q^*
 \\
-= (1-\alpha)(Q_t-Q^*)+\alpha[R_{t+1}+\gamma maxQ_t(S_{t+1})-Q^*]
+= (1-\alpha)(Q_t-Q^*)+\alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})-Q^*]
 $$
 
 带入贝尔曼最优方程：
 
 $$
-e_{t+1} = (1-\alpha)e_t + \alpha[R_{t+1}+\gamma maxQ_t(S_{t+1})-(R_{t+1}+\gamma maxQ^*(S_{t+1}))]
+e_{t+1} = (1-\alpha)e_t + \alpha[R_{t+1}+\gamma\max Q_t(S_{t+1})-(R_{t+1}+\gamma\max Q^*(S_{t+1}))]
 \\
-e_{t+1} = (1-\alpha)e_t+\alpha\gamma[maxQ_t(S_{t+1})-maxQ^*(S_{t+1})]
+e_{t+1} = (1-\alpha)e_t+\alpha\gamma[\max Q_t(S_{t+1})-\max Q^*(S_{t+1})]
 $$
 
 由于
 
 $$
-|maxQ_t - maxQ^*| ≤ max|Q_t - Q^*| = |e_t|
+|\max Q_t - \max Q^*| \leq \max|Q_t - Q^*| = |e_t|
 $$
 
 再由三角不等式，有：
 
 $$
-|e_{t+1}| ≤ (1-\alpha)|e_t| + \alpha\gamma |e_t| 
+|e_{t+1}| \leq (1-\alpha)|e_t| + \alpha\gamma |e_t| 
 $$
 
 即为：
 
 $$
-|e_{t+1}| ≤ (1-\alpha + \alpha\gamma )|e_t| 
+|e_{t+1}| \leq (1-\alpha + \alpha\gamma )|e_t| 
 $$
 
 由于
 
 $$
-\alpha ∈ (0,1],\gamma ∈ [0,1)
+\alpha \in (0,1],\ \gamma \in [0,1)
 $$
 
 则
@@ -123,7 +123,7 @@ $$
 也就是要算
 
 $$
-∇_θJ(θ)
+\nabla_\theta J(\theta)
 $$
 
 期望的展开式是：
@@ -210,7 +210,7 @@ $$
 我们用跑一条轨迹（蒙特卡洛采样）算出来的值，去估计（估算）真实的梯度：
 
 $$
-\nabla_\theta J(\theta) ≈  \sum_{t=0}^T\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot G_t
+\nabla_\theta J(\theta) \approx  \sum_{t=0}^T\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot G_t
 $$
 
 由此可以反推出Loss(求J的最大值，等价于求-J的最小值):
