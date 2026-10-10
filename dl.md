@@ -321,7 +321,7 @@ $$
 \lfloor (n_h-k_h+p_h+s_h)/s_h \rfloor × \lfloor (n_w-k_w+p_w+s_w)/s_w \rfloor
 $$
 
-注意这里的 $p_h$ 是两侧填充的**总行数**（大约一半在顶部、一半在底部），对应 PyTorch 里 `padding` 参数（单侧）的 2 倍。用 PyTorch 的单侧记法 $P$ 写就是 $\lfloor{}(n+2P-K)/S{}\rfloor{}+{}1$，两者等价，不要混用。
+注意这里的 $p_h$ 是两侧填充的**总行数**（大约一半在顶部、一半在底部），对应 PyTorch 里 `padding` 参数（单侧）的 2 倍。用 PyTorch 的单侧记法 $P$ 写就是 $\lfloor{}(n+2P-K)/S{}\rfloor{}+{}1$ ，两者等价，不要混用。
 
 #### 实验5：填充和步幅的具体实现
 >
@@ -349,7 +349,7 @@ Y_{j,,} = \sum_{i=1}^{c_i} (X_{i,,} ※ W_{j,i,,}) + b_j \\
 \text{where ※ is the convolution, } j = 1, \dots, c_o
 $$
 
-偏置的维度是 $c_o$——每个输出通道一个标量偏置 $b_j$，广播加到该通道整个 $m_h{}×{}m_w$ 的输出上。单输出通道时偏置就退化成一个标量 $b$。
+偏置的维度是 $c_o$ ——每个输出通道一个标量偏置 $b_j$ ，广播加到该通道整个 $m_h{}×{}m_w$ 的输出上。单输出通道时偏置就退化成一个标量 $b$ 。
 
 每个输出通道可以识别特定模式，输入通道核识别并组合输入中的模式。每个输入通道有独立的二维卷积核，每个输出通道有独立的三维卷积核。
 
@@ -601,7 +601,7 @@ $$
 
 ## 十、序列模型和语言模型概述
 
-音乐、语言、文本和视频都是连续的，即在时间t观察到 $x_t$，那么得到T个不独立的随机变量:
+音乐、语言、文本和视频都是连续的，即在时间t观察到 $x_t$ ，那么得到T个不独立的随机变量:
 
 $$
 (x_1,...,x_T) 
@@ -746,19 +746,19 @@ $$
 
 ![rnn](pics/11.png)
 
-- $H_t$或$H_{t-1}$为形状为(batch_size,hidden_size)的张量，代表状态。
+- $H_t$ 或 $H_{t-1}$ 为形状为(batch_size,hidden_size)的张量，代表状态。
 
-- $W_{hh}$为形状为(hidden_size,hidden_size)的张量。
+- $W_{hh}$ 为形状为(hidden_size,hidden_size)的张量。
 
-- X为形状为(num_steps,batch_size,vocab_size)的张量。$X_t$为形状为(batch_size,vocab_size)的张量。
+- X为形状为(num_steps,batch_size,vocab_size)的张量。 $X_t$ 为形状为(batch_size,vocab_size)的张量。
 
-- $W_{xh}$为形状为(vocab_size,hidden_size)的张量。
+- $W_{xh}$ 为形状为(vocab_size,hidden_size)的张量。
 
-- $B_h$为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
+- $B_h$ 为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
 
-- $W_{ho}$为形状为(hidden_size,vocab_size)的张量。
+- $W_{ho}$ 为形状为(hidden_size,vocab_size)的张量。
 
-- $B_o$为形状为(1,vocab_size)的张量，公式里通过广播和其他张量相加。
+- $B_o$ 为形状为(1,vocab_size)的张量，公式里通过广播和其他张量相加。
 
 则rnn的公式是：
 
@@ -786,7 +786,7 @@ $$
 \pi = \frac{1}{n}\sum_{t=1}^{n}-logp(x_t|x_{t-1},...) 
 $$
 
-p是语言模型的预测概率，$x_t$是真实词。
+p是语言模型的预测概率， $x_t$ 是真实词。
 
 有困惑度：
 
@@ -814,15 +814,15 @@ $$
 
 我们发现一个徐丽不是每个观测值都是同等重要的，想只记住相关的观察需要：能关注的机制（更新门）和能遗忘的机制（重置门）。
 
-- $W_{xr}$或$W_{xz}$或$W_{xh}$为形状为(vocab_size,hidden_size)的张量。
+- $W_{xr}$ 或 $W_{xz}$ 或 $W_{xh}$ 为形状为(vocab_size,hidden_size)的张量。
 
-- $W_{hr}$或$W_{hz}$或$W_{hh}$为形状为(hidden_size,hidden_size)的张量。
+- $W_{hr}$ 或 $W_{hz}$ 或 $W_{hh}$ 为形状为(hidden_size,hidden_size)的张量。
 
-- $B_r$或$B_z$或$B_h$为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
+- $B_r$ 或 $B_z$ 或 $B_h$ 为形状为(1,hidden_size)的张量，公式里通过广播和其他张量相加。
 
-- X为形状为(num_steps,batch_size,vocab_size)的张量。$X_t$为形状为(batch_size,vocab_size)的张量。
+- X为形状为(num_steps,batch_size,vocab_size)的张量。 $X_t$ 为形状为(batch_size,vocab_size)的张量。
 
-- $H_t$或$H_{t-1}$或$R_t$或$Z_t$或$\tilde{H_t}$为形状为(batch_size,hidden_size)的张量。
+- $H_t$ 或 $H_{t-1}$ 或 $R_t$ 或 $Z_t$ 或 $\tilde{H_t}$ 为形状为(batch_size,hidden_size)的张量。
 
 我们有GRU:
 
@@ -927,7 +927,7 @@ seq2seq从一个句子生成另一个句子。
 
 衡量指标--衡量生成序列的好坏的BLEU：
 
-假设$P_n$是预测中所有n-gram的精度，BLEU的定义为：
+假设 $P_n$ 是预测中所有n-gram的精度，BLEU的定义为：
 
 $$
 BLEU = exp(min(0,1-\frac{len_{label}}{len_{pred}}))\prod_{n=1}^{k}p_n^{1/2^n}
@@ -991,7 +991,7 @@ table2展示了另一条路径，它在第二步没有选当前最大的概率�
 
 为了找到最优，假如用穷举搜索，最优算法即为：对所有可能的序列，计算它的概率，然后选取最好的那个。
 
-如果输出字典大小为n,序列最长为T，那么我们需要考察$n^T$个序列，
+如果输出字典大小为n,序列最长为T，那么我们需要考察 $n^T$ 个序列，
 
 比如n=10000，T=10，则
 
@@ -1159,7 +1159,7 @@ $$
 
 下面讲解自注意力。
 
-给定序列$x_1,...,x_n$，任意$x_i∈R^d$，自注意力池化层将$x_i$当做key, value，query来对序列抽取特征得到$y_1,...,y_n$，这里
+给定序列 $x_1,...,x_n$ ，任意 $x_i∈R^d$ ，自注意力池化层将 $x_i$ 当做key, value，query来对序列抽取特征得到 $y_1,...,y_n$ ，这里
 
 $
 y_i = f(x_i,(x_1,x_1),...,(x_n,x_n)) ∈ R^d
