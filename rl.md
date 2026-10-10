@@ -137,7 +137,7 @@ $$
 P(\tau|\theta) = \underbrace{\rho_0(S_0)}_{\text{初始状态概率}} \cdot \prod_{t=0}^{T} \underbrace{P(S_{t+1}|S_t, A_t)}_{\text{环境状态转移概率}} \cdot \prod_{t=0}^{T} \underbrace{\pi_\theta(A_t|S_t)}_{\text{策略网络概率}} 
 $$
 
-我们要求 $\nabla_\theta J(\theta)$：
+我们要求 $\nabla_\theta{}J(\theta)$：
 
 $$
 \nabla_\theta J(\theta) = \nabla_\theta \sum_{\tau} P(\tau|\theta) G(\tau) = \sum_{\tau} \nabla_\theta P(\tau|\theta) G(\tau) 
@@ -203,7 +203,7 @@ $$
 \nabla_\theta J(\theta) = \mathbb{E}_{\pi_\theta} [ \sum_{t=0}^T\nabla_\theta \log \pi_\theta(A_t|S_t) \cdot G_t ] 
 $$
 
-下标的替换是因为：策略 $\pi_\theta$ 是决定轨迹分布 $P(\tau|\theta)$ 中唯一包含参数 $\theta$  的部分（环境转移 $P(S'|S,A)$ 和初始状态 $\rho_0$ 都不依赖 $\theta$）。所以，对轨迹分布求期望 $\mathbb{E}_{\tau \sim P(\cdot|\theta)}[\dots]$，在数学上就完全等价于对策略 $\pi_\theta$ 求期望 $\mathbb{E}_{\pi_\theta}[\dots]$。这两个符号指代的是同一个东西。
+下标的替换是因为：策略 $\pi_\theta$ 是决定轨迹分布 $P(\tau|\theta)$ 中唯一包含参数 $\theta$  的部分（环境转移 $P(S'|S,A)$ 和初始状态 $\rho_0$ 都不依赖 $\theta$）。所以，对轨迹分布求期望 $\mathbb{E}_{\tau{}\sim{}P(\cdot|\theta)}[\dots]$，在数学上就完全等价于对策略 $\pi_\theta$ 求期望 $\mathbb{E}_{\pi_\theta}[\dots]$。这两个符号指代的是同一个东西。
 
 我们不需要、也没法推出 J 本身。回到J的定义，其对所有可能的轨迹 τ 求和，轨迹的数量那就多了去了， J(θ) 的解析表达式是永远写不出来的。它在坐标系里是一个无穷维的怪物。J的梯度同理。但是我们可以跑一条轨迹，用单次采样（蒙特卡洛）来近似！
 
@@ -300,7 +300,7 @@ Actor-Critic 是 Online 的，跑完一局，立刻更新，用完就扔。这�
 ![ppo](pics/29.png)
 
 PPO 解决这个问题的纯代数方式极其暴力：
-- **第一步（Importance Sampling）**：在更新时，乘以一个比值 $r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{old}(a_t|s_t)}$。这个比值相当于在数学上“强行纠正”过期数据的分布偏差。这样，你就能用旧数据 $\pi_{old}$ 跑出来的轨迹，反复更新当前的 $\pi_\theta$。
+- **第一步（Importance Sampling）**：在更新时，乘以一个比值 $r_t(\theta){}={}\frac{\pi_\theta(a_t|s_t)}{\pi_{old}(a_t|s_t)}$。这个比值相当于在数学上“强行纠正”过期数据的分布偏差。这样，你就能用旧数据 $\pi_{old}$ 跑出来的轨迹，反复更新当前的 $\pi_\theta$。
 - **第二步（Clip）**：但比值 $r_t$ 不能太大，否则梯度会爆炸。所以 PPO 加了一个强制约束：
 
 $$
@@ -311,7 +311,7 @@ $$
 
 **这里推导一下Actor Loss：**
 
-首先，为什么 AC 的 Loss 里有 $\log \pi_\theta$？
+首先，为什么 AC 的 Loss 里有 $\log{}\pi_\theta$？
 
 因为我们要最大化目标 $J(\theta)$，对策略参数 $\theta$ 求梯度后，根据策略梯度定理，得到：
 $$
@@ -321,9 +321,9 @@ $$
 $$
  \text{Loss}_{actor} = - \log \pi_\theta(A_t|S_t) \cdot \text{detach}(A_t) 
 $$
-当 PyTorch 执行 `loss.backward()` 时，它会对 $\log \pi_\theta$ 求导，刚好得到 $\nabla_\theta \log \pi_\theta$，完美对应数学目标。
+当 PyTorch 执行 `loss.backward()` 时，它会对 $\log{}\pi_\theta$ 求导，刚好得到 $\nabla_\theta{}\log{}\pi_\theta$，完美对应数学目标。
 
-那 PPO 是怎么把 $\log \pi_\theta$ “藏起来”的？
+那 PPO 是怎么把 $\log{}\pi_\theta$ “藏起来”的？
 
 PPO 为了能用旧策略 $\pi_{old}$ 的数据，引入了重要性采样比值：
 
@@ -343,9 +343,9 @@ $$
  \nabla_\theta \log r_t(\theta) = \nabla_\theta \log \pi_\theta - 0 = \nabla_\theta \log \pi_\theta 
 $$
 
-（看！$\log \pi_\theta$ 的梯度，就是 $r_t(\theta)$ 的对数梯度。）
+（看！$\log{}\pi_\theta$ 的梯度，就是 $r_t(\theta)$ 的对数梯度。）
 
-利用初中代数的链式法则（$\nabla f = f \cdot \nabla \log f$），我们可以推出一个极其漂亮的等式：
+利用初中代数的链式法则（$\nabla{}f{}={}f{}\cdot{}\nabla{}\log{}f$），我们可以推出一个极其漂亮的等式：
 
 $$
  \nabla_\theta r_t(\theta) = r_t(\theta) \cdot \nabla_\theta \log r_t(\theta) = r_t(\theta) \cdot \nabla_\theta \log \pi_\theta 
@@ -364,19 +364,19 @@ $$
  \mathbb{E} \left[ r_t(\theta) \nabla_\theta \log \pi_\theta \cdot A_t \right] 
 $$
 
-把上面推导的等式代进去（$r_t(\theta) \nabla_\theta \log \pi_\theta = \nabla_\theta r_t(\theta)$）：
+把上面推导的等式代进去（$r_t(\theta){}\nabla_\theta{}\log{}\pi_\theta{}={}\nabla_\theta{}r_t(\theta)$）：
 
 $$
  \mathbb{E} \left[ \nabla_\theta r_t(\theta) \cdot A_t \right] 
 $$
 
-反推 Loss，因为我们在数学上要算的梯度变成了 $\mathbb{E}[\nabla_\theta r_t(\theta) \cdot A_t]$，所以我们只需要在代码里拼凑出这样的 Loss：
+反推 Loss，因为我们在数学上要算的梯度变成了 $\mathbb{E}[\nabla_\theta{}r_t(\theta){}\cdot{}A_t]$，所以我们只需要在代码里拼凑出这样的 Loss：
 
 $$
  \text{Loss}_{actor} = - r_t(\theta) \cdot \text{detach}(A_t) 
 $$
 
-这就是看到的 PPO Loss 里没有 $\log \pi_\theta$ 的原因。
+这就是看到的 PPO Loss 里没有 $\log{}\pi_\theta$ 的原因。
 
 为了防止 $r_t(\theta)$ 太大（策略更新步子太猛），PPO 在 Loss 外面套了一个 `min` 和 `clip`：
 $$
@@ -404,22 +404,22 @@ $$ Q_t = V_t + A_t $$
 $$ \text{Target}_{PPO} = V_{old}(S_t) + \hat{A}_t^{GAE} $$
 
 我们算优势 $A_t$ 有两种极端做法：
-- **极端一（高方差，无偏）**：蒙特卡洛（REINFORCE）。$A_t = G_t - V(S_t)$。依靠完整的真实回报 $G_t$，随机性大。
-- **极端二（低方差，有偏）**：单步 TD Error（Actor-Critic）。$A_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t)$。依靠下一状态的估计，平稳但存在偏差。
+- **极端一（高方差，无偏）**：蒙特卡洛（REINFORCE）。$A_t{}={}G_t{}-{}V(S_t)$。依靠完整的真实回报 $G_t$，随机性大。
+- **极端二（低方差，有偏）**：单步 TD Error（Actor-Critic）。$A_t{}={}R_{t+1}{}+{}\gamma{}V(S_{t+1}){}-{}V(S_t)$。依靠下一状态的估计，平稳但存在偏差。
 
-**GAE(广义优势估计) 的本质就是通过引入系数 $\lambda \in [0,1]$，在两者之间做平滑的代数插值。**
+**GAE(广义优势估计) 的本质就是通过引入系数 $\lambda{}\in{}[0,1]$，在两者之间做平滑的代数插值。**
 
 首先定义单步 TD Error：
 
 $$ \delta_t = R_{t+1} + \gamma V(S_{t+1}) - V(S_t) $$
 
-GAE 的定义是将当前步和未来所有步的 $\delta$ 加权求和，权重为 $(\gamma \lambda)^l$：
+GAE 的定义是将当前步和未来所有步的 $\delta$ 加权求和，权重为 $(\gamma{}\lambda)^l$：
 
 $$ \hat{A}_t^{GAE} = \sum_{l=0}^{\infty} (\gamma \lambda)^l \delta_{t+l} = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \dots $$
 
 **极限验证（纯代数展开）：**
-- **当 $\lambda = 0$ 时**：$\hat{A}_t^{GAE} = \delta_t$，退化为单步 AC 的优势。
-- **当 $\lambda = 1$ 时**：展开式子，中间的 $V$ 项会互相抵消（多米诺骨牌），最终得 $\hat{A}_t^{GAE} = G_t - V_t$，退化为 REINFORCE 的蒙特卡洛优势。
+- **当 $\lambda{}={}0$ 时**：$\hat{A}_t^{GAE}{}={}\delta_t$，退化为单步 AC 的优势。
+- **当 $\lambda{}={}1$ 时**：展开式子，中间的 $V$ 项会互相抵消（多米诺骨牌），最终得 $\hat{A}_t^{GAE}{}={}G_t{}-{}V_t$，退化为 REINFORCE 的蒙特卡洛优势。
 
 GAE的工程实现--倒序计算与 Target 合并：在代码里，不可能去算无穷级数，利用递推关系：
 
