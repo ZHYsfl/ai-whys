@@ -1225,3 +1225,10 @@ transformer:
 
 ## 十七、BERT(Bidirectional Encoder Repreasentations rom Transformers)
 
+![bert](pics/30.png)
+
+#### 实验34：bert pretraining phase的实现
+>
+>`code/nlp/bert.py`
+>`code/nlp/bert_pretrain_dataset.py`
+>`code/nlp/bert_pretrain.py`
