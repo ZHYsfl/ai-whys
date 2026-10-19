@@ -1227,7 +1227,7 @@ transformer:
 
 ![bert](pics/30.png)
 
-#### 实验34：bert pretraining phase的实现
+#### 实验39：bert pretraining phase的实现
 >
 >`code/nlp/bert.py`
 >`code/nlp/bert_pretrain_dataset.py`
