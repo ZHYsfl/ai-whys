@@ -1,0 +1,3 @@
+# 仓库所有文件的所有者：PR 必须经其批准才能合并
+# （配合分支保护规则中的 "Require review from Code Owners"）
+* @ZHYsfl
