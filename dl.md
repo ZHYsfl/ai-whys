@@ -1223,7 +1223,7 @@ transformer:
 >
 >`code/nlp/transformer.py`
 
-## 十七、BERT(Bidirectional Encoder Repreasentations rom Transformers)
+## 十七、BERT(Bidirectional Encoder Representations from Transformers)
 
 ![bert](pics/30.png)
 
