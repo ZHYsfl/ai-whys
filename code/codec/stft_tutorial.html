@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>STFT 从零到一 · 交互教程</title>
+<style>
+  body { font-family: system-ui, "Noto Sans CJK SC", sans-serif; max-width: 880px;
+         margin: 24px auto; padding: 0 16px; color: #222; line-height: 1.7; }
+  h1 { font-size: 24px; } h2 { font-size: 20px; margin-top: 8px; }
+  h3 { font-size: 16px; margin-bottom: 6px; }
+  section { border: 1px solid #ddd; border-radius: 10px; padding: 16px 20px; margin: 18px 0; }
+  canvas { border: 1px solid #ccc; border-radius: 6px; background: #fff; display: block; margin: 8px 0; }
+  button { font-size: 14px; padding: 6px 14px; margin: 4px 6px 4px 0; border: 1px solid #888;
+           border-radius: 6px; background: #f5f5f5; cursor: pointer; }
+  button:hover { background: #e8e8ff; }
+  input[type=range] { width: 300px; vertical-align: middle; }
+  .tip { background: #fff8e1; border-left: 4px solid #f0b429; padding: 8px 12px; border-radius: 4px; }
+  .key { background: #e8f5e9; border-left: 4px solid #43a047; padding: 8px 12px; border-radius: 4px; }
+  .score { font-size: 22px; font-weight: bold; color: #6a1b9a; }
+  .bar-outer { width: 640px; height: 26px; background: #eee; border-radius: 5px; overflow: hidden; }
+  .bar-inner { height: 100%; background: #ab47bc; width: 0%; transition: width .1s; }
+  code, .f { background: #f0f0f0; padding: 1px 5px; border-radius: 4px; font-family: ui-monospace, monospace; }
+  table.legend td { padding: 2px 10px; }
+  .toc a { margin-right: 10px; font-size: 14px; }
+</style>
+</head>
+<body>
+
+<h1>STFT 从零到一 · 交互教程</h1>
+<p>配套 <code>losses.py</code> 的 <code>torch.stft(...)</code>。记号：采样率 <b>sr = 16000 Hz</b>（每秒采 16000 个点），窗口 <b>N = 128</b> 点。<b>每节都以动手为主，文字只是路标。</b></p>
+<p class="toc">目录：
+<a href="#s1">1 纯音</a><a href="#s2">2 叠加</a><a href="#s3">3 探针</a><a href="#s4">4 频谱</a><a href="#s5">5 频率格</a><a href="#s6">6 频谱图</a><a href="#s7">7 相位</a><a href="#s8">8 复数</a><a href="#s9">9 汉宁窗</a><a href="#s10">10 参数</a><a href="#s11">11 收敛</a></p>
+
+<!-- ============ 1 纯音 ============ -->
+<section id="s1">
+<h2>第 1 节 · 最简单的声音：纯音</h2>
+<p>麦克风每秒量 16000 次气压，得到一串数字 = <b>波形</b>。最简单的波形是正弦波，只有两个旋钮：<b>频率</b>（每秒振几圈 → 音高）、<b>幅度</b>（振多猛 → 响度）。拖一拖，听一听：</p>
+<p>频率 = <input type="range" id="wToneF" min="100" max="2000" value="440" step="10"> <b><span id="wToneFv">440</span> Hz</b>
+&nbsp; 幅度 = <input type="range" id="wToneA" min="10" max="100" value="80" step="5"> <b><span id="wToneAv">0.8</span></b>
+<button id="wTonePlay">🔊 听</button></p>
+<canvas id="wTone" width="660" height="120"></canvas>
+</section>
+
+<!-- ============ 2 叠加 ============ -->
+<section id="s2">
+<h2>第 2 节 · 复杂声音 = 纯音相加</h2>
+<p>两个纯音同时响，气压就是<b>逐点相加</b>。灰 = 两个成分，蓝 = 叠加结果：</p>
+<p>成分1 = <input type="range" id="wMixF1" min="100" max="1000" value="440" step="10"> <b><span id="wMixF1v">440</span> Hz</b>
+&nbsp; 成分2 = <input type="range" id="wMixF2" min="100" max="1000" value="880" step="10"> <b><span id="wMixF2v">880</span> Hz</b>
+<button id="wMixPlay">🔊 听叠加</button></p>
+<canvas id="wMix" width="660" height="130"></canvas>
+<div class="key">任何复杂声音都是一堆纯音的叠加。于是有了逆向问题：<b>给你混合波形，怎么拆出里面的成分？</b>→ 下一节</div>
+</section>
+
+<!-- ============ 3 探针 ============ -->
+<section id="s3">
+<h2>第 3 节 · 探针：一个频率，一个得分</h2>
+<p>想知道"信号里有没有频率 f"？拿一个 f 的标准正弦（<b>探针</b>）和信号<b>逐点相乘再全加起来</b>：同步 → 乘积几乎全正 → 得分大；不同步 → 正负抵消 → 得分 ≈ 0。信号固定 <b>500Hz</b>，拖探针频率试：</p>
+<p>探针频率 = <input type="range" id="w2f" min="0" max="8000" value="500" step="5"> <b><span id="w2fv">500</span> Hz</b>
+<button onclick="setProbe(500)">对准 500</button>
+<button onclick="setProbe(700)">试试 700</button>
+<button onclick="setProbe(1100)">试试 1100</button></p>
+<canvas id="w2a" width="660" height="120"></canvas>
+<canvas id="w2b" width="660" height="100"></canvas>
+<p style="margin:2px 0">↑ 上：蓝 = 信号，红虚线 = 探针。下：乘积（<span style="color:#43a047">绿正</span>/<span style="color:#e53935">红负</span>），得分 = 抵消后剩下的总量。</p>
+<div class="bar-outer"><div class="bar-inner" id="w2bar"></div></div>
+<p>得分：<span class="score" id="w2score">–</span></p>
+</section>
+
+<!-- ============ 4 频谱 ============ -->
+<section id="s4">
+<h2>第 4 节 · 扫频：得分连成线 = 频谱</h2>
+<p>把探针频率从 0 一路扫到 8000Hz（天花板，第 5 节），得分连成曲线——这张"每个频率多少分"的图就叫<b>频谱</b>（配料表）。点按钮看它长出来：</p>
+<button id="w4go">▶ 扫频</button> <span style="color:#888;font-size:13px">（信号 = 500Hz，虚线 = 500Hz 的位置）</span>
+<canvas id="w4sweep" width="660" height="220"></canvas>
+<div class="key">读法：<b>峰在哪里，信号里就有什么频率</b>。</div>
+</section>
+
+<!-- ============ 5 频率格 ============ -->
+<section id="s5">
+<h2>第 5 节 · 频率格与 k：只试 65 个频率就够了</h2>
+<p>频率有无穷多个，难道每个都试？先动手发现一个规律——拖探针频率，盯三根柱（两路探针都画出来了，第 7 节解释为什么有两路）：</p>
+<p>探针频率 = <input type="range" id="w8f" min="0" max="8000" value="625" step="5"> <b><span id="w8fv">625</span> Hz</b>
+<button onclick="w8set(375)">375</button><button onclick="w8set(500)">500</button>
+<button onclick="w8set(550)">550</button><button onclick="w8set(625)">625</button></p>
+<canvas id="w8bars" width="660" height="95"></canvas>
+<p style="margin:2px 0">↓ 乘积 = 信号×探针<b>逐点</b>相乘（<span style="color:#43a047">绿正</span>/<span style="color:#e53935">红负</span>）。注意：<b>得分不是某一个点的取值，是这 128 个乘积全部加起来</b>——选一路探针，亲眼看正负面积抵消：
+<label><input type="radio" name="w8probe" value="sin" checked> sin 探针</label>
+<label><input type="radio" name="w8probe" value="cos"> cos 探针</label>
+&nbsp;→ 正面积 <b id="w8pos" style="color:#43a047"></b> + 负面积 <b id="w8neg" style="color:#e53935"></b> = <b id="w8sum"></b></p>
+<canvas id="w8prod" width="660" height="100"></canvas>
+<div class="tip">规律：窗口里 500Hz 走 <b>4</b> 圈，375/625Hz 走 <b>3/5</b> 圈——<b>圈数差是整数 → 正负面积恰好抵消 → 得分严格为 0</b>；550Hz 走 4.4 圈、差 0.4 圈 → 抵消不完 → 漏分。</div>
+<p>所以只要试探"<b>窗口内恰好走整数圈</b>"的频率，它们两两互不干扰：<br>
+窗口 = 128 点 = 8 毫秒；走 k 圈 ⇔ 频率 = k ÷ 0.008 = <b>k × 125 Hz</b>。<br>
+这些固定下来的频率位置叫<b>频率格</b>，编号 <b>k</b> 就是格子编号（"第 k 格"）。<br>
+那为什么 65 格要<b>全部</b>试探？因为<b>你事先不知道信号里有什么频率</b>——换几种信号，看 65 个格子的得分：<br>
+<button onclick="setSig('pure')">纯音 500Hz</button>
+<button onclick="setSig('dual')">双音 375+1000Hz</button>
+<button onclick="setSig('vowel')">类元音（125Hz 的倍频叠加）</button>
+<button onclick="setSig('noise')">白噪声</button>
+<span id="w9sig" style="color:#888;font-size:13px">当前：纯音 500Hz</span></p>
+<p>第 k = <input type="range" id="w9k" min="0" max="64" value="4" step="1"> <b><span id="w9kv">4</span></b> 格
+&nbsp;→ 频率 <b><span id="w9kf">500</span> Hz</b>，得分 <b><span id="w9ks">64.0</span></b></p>
+<canvas id="w9bars" width="660" height="170"></canvas>
+<div class="key">读法：<b>峰落在哪格，信号里就有哪个频率；柱子多高，就有多少</b>——得分 = 成分振幅 × 64（探针对准时乘积 = 振幅×sin²，sin² 在窗口里平均恰好 ½，128×½ = 64）。所以双音里振幅 1.0 的 375Hz 得 64 分、振幅 0.8 的 1000Hz 得 51.2 分，一高一矮。纯音只亮 1 格，混合音亮多格，白噪声 65 格全亮：<b>没有一格是多余的</b>。柱子的高度 = 每格的 √(a²+b²)，所以这 65 个数实际是<b>幅度谱</b>；复数<b>频谱</b>则是 65×2 = 130 个数（含相位）。<br>
+这 65 个格子是一个"完美俱乐部"：<b>成员之间互相绝对听不见（精确为 0）</b>；但<b>非成员（格外频率，如 550Hz）会被所有格子听见一点</b>，离得越近听得越清——这叫"泄漏"，第 9 节专门处理它。<br>
+k 到 64 为止：64×125 = 8000Hz = sr÷2——一个周期至少要 2 个采样点才画得出，这是天花板。（130 个数中 2 个恒为 0，恰好 = 原片段 128 个点的信息量：复数频谱不丢信息，只是换了摆法。）</div>
+</section>
+
+<!-- ============ 6 频谱图 ============ -->
+<section id="s6">
+<h2>第 6 节 · 声音随时间变 → 频谱图</h2>
+<p>信号：1 秒钟，<b>前半秒 440Hz，后半秒 880Hz</b>。点播放：红框（当前窗口）滑过波形，左下是它的幅度谱（<b>65 格全画：0~8000Hz</b>），右边逐列拼出<b>频谱图</b>——每列 = 一张<b>幅度谱</b>（每格 √(a²+b²)，相位已丢）竖起来涂色：</p>
+<button id="w4play">▶ 播放扫描</button>
+<button id="w4snd">🔊 听这段声音</button>
+<div>窗口位置：<input type="range" id="w4s" min="0" max="496" value="0" step="1"></div>
+<canvas id="w4wave" width="760" height="130"></canvas>
+<canvas id="w4bars" width="200" height="260" style="display:inline-block;vertical-align:top"></canvas>
+<div style="display:inline-block;vertical-align:middle;font-size:26px;padding:0 6px">→<br>转<br>90°<br>→</div>
+<canvas id="w4gram" width="520" height="260" style="display:inline-block;vertical-align:top"></canvas>
+<p style="margin:2px 0">↑ 右图：横轴 = 时间，纵轴 = 频率，<b>颜色越亮 = 强度越大</b>。前半秒亮带在 440Hz，后半秒跳到 880Hz。</p>
+</section>
+
+<!-- ============ 7 相位与两路探针 ============ -->
+<section id="s7">
+<h2>第 7 节 · 相位陷阱：为什么需要两路探针</h2>
+<p>此前的探针都是 sin。若信号<b>错开半个节拍</b>（相位不同）呢？拖相位滑块，盯三根柱：</p>
+<p>信号相位 φ = <input type="range" id="w5phase" min="0" max="180" value="0" step="5"> <b><span id="w5phasev">0</span>°</b></p>
+<canvas id="w5phasesig" width="660" height="100"></canvas>
+<canvas id="w5phasebars" width="660" height="95"></canvas>
+<div class="tip">φ 到 90° 时 sin 探针归零——<b>单路探针会把真实存在的成分漏报</b>！cos 探针恰好满格。合并 √(a²+b²) 恒定。所以每个频率格要存<b>两个</b>得分：(a, b)——打包方式就是下节的复数。<br>
+可逆性也在这里分家：<b>(a, b) 都在 → 与 128 个采样点等价，可完美复原原波形（白噪声也一样）</b>；只存合并值 √(a²+b²) 就丢了"相位"（成分在窗口内的对时位置），再也回不去——第 6 节那张彩色频谱图就是这么有损的。</div>
+</section>
+
+<!-- ============ 8 复数 ============ -->
+<section id="s8">
+<h2>第 8 节 · 复数与 e<sup>iθ</sup>：把两路得分打包</h2>
+<p><b>复数 a + bi 就是一对数 (a, b)</b>——平面上的一个点：a 横坐标，b 纵坐标。相乘只有一条规则：<b>i² = −1</b>。</p>
+<h3>8.1 圆上的点相乘 → 角度相加</h3>
+<pre style="background:#f6f8fa;padding:10px;border-radius:6px;font-size:14px">(cos30° + i·sin30°) × (cos50° + i·sin50°)
+实部 = cos30°·cos50° − sin30°·sin50° = cos(30°+50°) = cos80°   ← 各自套用和角公式
+虚部 = sin30°·cos50° + cos30°·sin50° = sin(30°+50°) = sin80°
+= (0.1736 + 0.9848i) = (cos80°, sin80°)</pre>
+<h3>8.2 所以起名叫 e 的幂</h3>
+<p>指数法则 <b>eᵃ × eᵇ = eᵃ⁺ᵇ</b>（乘起来指数相加）与"圆上的点乘起来角度相加"行为一模一样——于是把"角度 θ 的点"命名为 <b>e<sup>iθ</sup></b>，旋转就变成了指数加法。欧拉公式 <b>e<sup>iθ</sup> = cosθ + i·sinθ</b> 不是巧合，是个起得极好的名字。</p>
+<h3>8.3 单位圆动起来</h3>
+<p>θ = <input type="range" id="w7th" min="0" max="360" value="30" step="2"> <b><span id="w7thv">30</span>°</b>
+<button id="w7play">▶ 转起来</button></p>
+<canvas id="w7circle" width="240" height="240" style="display:inline-block;vertical-align:top"></canvas>
+<canvas id="w7wave" width="400" height="240" style="display:inline-block;vertical-align:top;margin-left:10px"></canvas>
+<p style="margin:2px 0">↑ 左：单位圆上的点 e<sup>iθ</sup>（蓝 = cosθ，红 = sinθ）。右：坐标展开成曲线——sin/cos 曲线就是这么来的。</p>
+<h3>8.4 探针角度 2πkn/N 的由来</h3>
+<pre style="background:#f6f8fa;padding:10px;border-radius:6px;font-size:14px">① 正弦波的角度写法:  sin(2π·f·t)      ← 一圈 = 2π 弧度；f 圈/秒 × t 秒 = f·t 圈，乘 2π 换成弧度
+② 离散化:  第 n 个采样点的时刻 t = n ÷ sr（sr = 采样率 16000）  →  sin(2π·f·n/sr)
+③ 格子频率（第 5 节）:  f = k×sr/N
+   代入:  2π·(k·sr/N)·n/sr = 2πkn/N   （sr 恰好约掉）</pre>
+<div class="tip">e<sup>−i·2πkn/N</sup>：n 每加 1，圆上的点多转一小格（k 越大转越快）；横坐标 = cos 探针，纵坐标 = sin 探针。"乘复数探针" = 两路一起乘，得分打包成 (a, b)。|X| = √(a²+b²) = 点到原点的距离（勾股定理）——相位怎么转，距离不变。</div>
+</section>
+
+<!-- ============ 9 汉宁窗 ============ -->
+<section id="s9">
+<h2>第 9 节 · 泄漏与汉宁窗</h2>
+<p>把信号换成 <b>550Hz</b>（不在任何格子上）再扫频：硬切（矩形窗）的频谱会拖出假尾巴。先扫矩形窗，再扫汉宁窗对比：</p>
+<button id="w9rect">扫频（矩形窗/硬切）</button>
+<button id="w9hann">扫频（汉宁窗）</button>
+<button id="w9clear">清除</button>
+<label><input type="checkbox" id="w9abs"> 绝对得分（不归一化）</label>
+<canvas id="w9spec" width="660" height="220"></canvas>
+<p style="margin:2px 0">横轴 = 探针频率，纵轴 = 得分（默认各自归一化、比形状）。虚线 = 550Hz。</p>
+<p><b>汉宁窗是什么：</b>一条"两端为 0、中间为 1"的砝码（由 cos 改造：w[n] = 0.5×(1−cos(2πn/(N−1)))），每个片段试探前先逐点乘上它，把两端的硬跳变压平——<b>跳变没了，假频率就没了</b>。拖 N 看点数变化：</p>
+<p>N = <input type="range" id="w1N" min="8" max="256" value="128" step="1"> <span id="w1Nv">128</span>
+<span style="color:#888;font-size:13px">（形状永远不变，N 只改变点数——拖到 8 看得最清楚）</span></p>
+<canvas id="w1" width="660" height="170"></canvas>
+</section>
+
+<!-- ============ 10 stft 参数 ============ -->
+<section id="s10">
+<h2>第 10 节 · <code>torch.stft</code> 参数对照</h2>
+<pre style="background:#f6f8fa;padding:10px;border-radius:6px">spectrum = torch.stft(
+    waveform,                # 输入波形 [B, T]
+    n_fft=128,               # 窗口宽度 N → 频率格 k×sr/N（第 5 节）
+    hop_length=32,           # 每次挪多远 → 10.1
+    win_length=128,          # 窗函数长度（这里 = n_fft）
+    window=window,           # 汉宁窗砝码（第 9 节）
+    center=True,             # 首尾补数据对齐 → 10.2
+    pad_mode="reflect",      # 补镜像
+    return_complex=True,     # 保留两路探针得分（第 7、8 节）
+)
+# 输出: [B, 65, 501] 复数张量</pre>
+
+<h3>10.1 hop_length：窗口每次挪多远</h3>
+<p>一个窗口干的事：框住 128 点 → 剪出来（下上图对照）：</p>
+<canvas id="w6one" width="660" height="100"></canvas>
+<canvas id="w6cut" width="660" height="80"></canvas>
+<p>第二个窗口只往前挪 <b>hop</b> 个点。拖滑块：</p>
+<p>hop = <input type="range" id="w6hop" min="16" max="128" step="16" value="32"> <b><span id="w6hopv">32</span></b> 点
+&nbsp;→ 重叠 <b id="w6ov">96</b> 点（<b id="w6ovp">75%</b>），这段信号共 <b id="w6nf">12</b> 帧
+&nbsp;<label><input type="checkbox" id="w6all"> 显示全部窗口</label></p>
+<canvas id="w6two" width="660" height="120"></canvas>
+<p style="margin:2px 0">↑ 蓝 = 窗口①（起点 0），红 = 窗口②（起点 hop），紫影 = 重叠区。hop 越小重叠越多、时间越密；代码取 hop = N÷4 = 32。</p>
+
+<h3>10.2 center 与 pad_mode：首尾怎么办</h3>
+<p>信号开头局部放大（灰底 = 补出来的区域，红框 = 第一个窗口）：</p>
+<p><label><input type="checkbox" id="w5center" checked> center=True（首尾补数据，让帧对齐时间轴）</label>
+&nbsp;&nbsp;pad_mode = <select id="w5pad"><option value="reflect">reflect（镜像翻折）</option><option value="constant">constant（补零）</option></select></p>
+<canvas id="w5centerc" width="660" height="140"></canvas>
+<div class="tip">center=True：第 0 帧居中于第 0 个采样点，首尾不漏不错位。补镜像比补零自然——补零等于插入一小段静音边缘。</div>
+</section>
+
+<!-- ============ 11 收敛 ============ -->
+<section id="s11">
+<h2>第 11 节 · 收敛：STFT 总公式</h2>
+<p style="font-size:21px;font-family:ui-monospace,monospace;background:#f6f8fa;padding:14px;border-radius:8px">
+X[m, k] = <span style="color:#6a1b9a">Σ<sub>n=0…N−1</sub></span>
+<span style="color:#1e88e5">x[m·H + n]</span> ·
+<span style="color:#00897b">w[n]</span> ·
+<span style="color:#e53935">e<sup>−i·2πkn/N</sup></span>
+</p>
+<table class="legend">
+<tr><td style="color:#1e88e5">x[m·H + n]</td><td>第 m 个窗口的第 n 个点（m·H = 窗口起点）→ <b>10.1</b></td></tr>
+<tr><td style="color:#00897b">w[n]</td><td>汉宁窗第 n 个砝码 → <b>第 9 节</b></td></tr>
+<tr><td style="color:#e53935">e<sup>−i·2πkn/N</sup></td><td>第 k 格的两路探针打包 → <b>第 7、8 节</b></td></tr>
+<tr><td style="color:#6a1b9a">Σ</td><td>128 个乘积求和 = 得分 → <b>第 3 节</b></td></tr>
+<tr><td>k = 0…64</td><td>65 个频率格 → <b>第 5 节</b></td></tr>
+<tr><td>m = 0…500</td><td>501 个窗口（16000÷32 = 500 步 + 起点）→ <b>第 6 节</b>；第 m 列 = 从 m×2 毫秒开始的 8 毫秒片段</td></tr>
+</table>
+<p>|X[m,k]| = √(实²+虚²) = 频谱图第 m 列第 k 行的亮度 = <code>.abs()</code>。</p>
+<div class="key">对<b>每个窗口（m）</b>、<b>每个频率格（k）</b>：乘窗 → 乘两路探针 → 求和。<code>torch.stft(...).abs()</code> 至此没有一个符号是陌生的。</div>
+</section>
+
+<script>
+"use strict";
+const SR = 16000, N = 128;
+const HANN = Array.from({length:N}, (_,i)=>0.5*(1-Math.cos(2*Math.PI*i/(N-1))));
+const RECT = new Array(N).fill(1);
+function el(id){ return document.getElementById(id); }
+function cv(id){ const c=el(id); return {c, x:c.getContext('2d'), W:c.width, H:c.height}; }
+function curve(ctx,W,H,ys,color,ymin,ymax,lw,dash){
+  ctx.beginPath(); ctx.setLineDash(dash||[]);
+  for(let i=0;i<ys.length;i++){ const px=i/(ys.length-1)*W, py=H*(1-(ys[i]-ymin)/(ymax-ymin)); i?ctx.lineTo(px,py):ctx.moveTo(px,py); }
+  ctx.strokeStyle=color; ctx.lineWidth=lw||2; ctx.stroke(); ctx.setLineDash([]);
+}
+function zeroLine(ctx,W,H,ymin,ymax){ const y=H*(1-(0-ymin)/(ymax-ymin));
+  ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.strokeStyle='#bbb'; ctx.lineWidth=1; ctx.stroke(); }
+function probeScore(sig, win, freq){
+  let re=0, im=0;
+  for(let i=0;i<sig.length;i++){ const v=sig[i]*win[i], ph=2*Math.PI*freq*i/SR;
+    re+=v*Math.cos(ph); im-=v*Math.sin(ph); }
+  return Math.hypot(re, im);
+}
+let actx=null;
+function playBuf(arr){
+  actx=actx||new (window.AudioContext||window.webkitAudioContext)();
+  const buf=actx.createBuffer(1,arr.length,SR); buf.copyToChannel(Float32Array.from(arr),0);
+  const s=actx.createBufferSource(); s.buffer=buf; s.connect(actx.destination); s.start();
+}
+function sine(f,a,len){ const out=new Float32Array(len); for(let i=0;i<len;i++) out[i]=a*Math.sin(2*Math.PI*f*i/SR); return out; }
+
+/* ---------- 1 纯音 ---------- */
+const cTone=cv('wTone');
+function drawTone(){
+  const f=+el('wToneF').value, a=+el('wToneA').value/100;
+  el('wToneFv').textContent=f; el('wToneAv').textContent=a.toFixed(2);
+  const x=cTone.x; x.clearRect(0,0,cTone.W,cTone.H); zeroLine(x,cTone.W,cTone.H,-1.1,1.1);
+  curve(x,cTone.W,cTone.H,Array.from(sine(f,a,480)),'#1e88e5',-1.1,1.1,2);
+}
+el('wToneF').oninput=drawTone; el('wToneA').oninput=drawTone;
+el('wTonePlay').onclick=()=>playBuf(sine(+el('wToneF').value, +el('wToneA').value/100, 8000));
+drawTone();
+
+/* ---------- 2 叠加 ---------- */
+const cMix=cv('wMix');
+function drawMix(){
+  const f1=+el('wMixF1').value, f2=+el('wMixF2').value;
+  el('wMixF1v').textContent=f1; el('wMixF2v').textContent=f2;
+  const a=Array.from(sine(f1,1,480)), b=Array.from(sine(f2,0.5,480));
+  const sum=a.map((v,i)=>v+b[i]);
+  const x=cMix.x; x.clearRect(0,0,cMix.W,cMix.H); zeroLine(x,cMix.W,cMix.H,-1.7,1.7);
+  curve(x,cMix.W,cMix.H,a,'#bbb',-1.7,1.7,1);
+  curve(x,cMix.W,cMix.H,b,'#ccc',-1.7,1.7,1);
+  curve(x,cMix.W,cMix.H,sum,'#1e88e5',-1.7,1.7,2.5);
+}
+el('wMixF1').oninput=drawMix; el('wMixF2').oninput=drawMix;
+el('wMixPlay').onclick=()=>{
+  const a=sine(+el('wMixF1').value,1,8000), b=sine(+el('wMixF2').value,0.5,8000);
+  playBuf(Array.from(a,(v,i)=>v+b[i]));
+};
+drawMix();
+
+/* ---------- 3 探针 ---------- */
+const sigP=Array.from(sine(500,1,N));
+const c2a=cv('w2a'), c2b=cv('w2b');
+function drawProbe(){
+  const f=+el('w2f').value; el('w2fv').textContent=f;
+  const prb=sigP.map((_,i)=>Math.sin(2*Math.PI*f*i/SR));
+  const prod=sigP.map((v,i)=>v*prb[i]);
+  let x=c2a.x; x.clearRect(0,0,c2a.W,c2a.H); zeroLine(x,c2a.W,c2a.H,-1.1,1.1);
+  curve(x,c2a.W,c2a.H,sigP,'#1e88e5',-1.1,1.1,2);
+  curve(x,c2a.W,c2a.H,prb,'#e53935',-1.1,1.1,2,[5,4]);
+  x=c2b.x; x.clearRect(0,0,c2b.W,c2b.H); zeroLine(x,c2b.W,c2b.H,-1.1,1.1);
+  const zy=c2b.H*(1-(0+1.1)/2.2);
+  for(let i=0;i<prod.length-1;i++){
+    const x1=i/(prod.length-1)*c2b.W, x2=(i+1)/(prod.length-1)*c2b.W;
+    const y=c2b.H*(1-(prod[i]+1.1)/2.2);
+    x.beginPath(); x.moveTo(x1,zy); x.lineTo(x1,y); x.lineTo(x2,zy); x.closePath();
+    x.fillStyle=prod[i]>=0?'rgba(67,160,71,.55)':'rgba(229,57,53,.55)'; x.fill();
+  }
+  curve(x,c2b.W,c2b.H,prod,'#6a1b9a',-1.1,1.1,1.5);
+  const s=probeScore(sigP,RECT,f);
+  el('w2score').textContent=s.toFixed(1);
+  el('w2bar').style.width=Math.min(100,s/64*100)+'%';
+}
+function setProbe(f){ el('w2f').value=f; drawProbe(); }
+el('w2f').oninput=drawProbe; drawProbe();
+
+/* ---------- 扫频工厂 ---------- */
+function makeSweeper(canvasId, sig, trueF, absId){
+  const c=cv(canvasId), curves={}, COLORS={rect:'#999',hann:'#e53935',plain:'#1e88e5'};
+  function redraw(){
+    const x=c.x,W=c.W,H=c.H; x.clearRect(0,0,W,H);
+    x.strokeStyle='#bbb'; x.beginPath(); x.moveTo(34,6); x.lineTo(34,H-22); x.lineTo(W-6,H-22); x.stroke();
+    x.fillStyle='#666'; x.font='12px sans-serif';
+    for(let f=0;f<=8000;f+=1000){ const px=34+(f/8000)*(W-44); x.fillText(f,px-8,H-6); }
+    const tx=34+(trueF/8000)*(W-44);
+    x.beginPath(); x.setLineDash([5,4]); x.moveTo(tx,6); x.lineTo(tx,H-22); x.strokeStyle='#1e88e5'; x.stroke(); x.setLineDash([]);
+    x.fillStyle='#1e88e5'; x.fillText(trueF,tx-12,16);
+    const abs=absId&&el(absId).checked;
+    let gm=1e-9;
+    if(abs) for(const k in curves) curves[k].forEach(p=>{ if(p[1]>gm) gm=p[1]; });
+    for(const k in curves){
+      const d=curves[k]; if(!d.length) continue;
+      let mx=gm; if(!abs){ mx=1e-9; d.forEach(p=>{ if(p[1]>mx) mx=p[1]; }); }
+      x.beginPath();
+      d.forEach(([f,s],i)=>{ const px=34+(f/8000)*(W-44), py=(H-22)-s/mx*(H-40); i?x.lineTo(px,py):x.moveTo(px,py); });
+      x.strokeStyle=COLORS[k]||'#1e88e5'; x.lineWidth=2.5; x.stroke();
+    }
+  }
+  function sweep(name,win){
+    curves[name]=[]; let f=0;
+    (function step(){
+      for(let j=0;j<6&&f<=8000;j++){ curves[name].push([f,probeScore(sig,win,f)]); f+=8; }
+      redraw(); if(f<=8000) requestAnimationFrame(step);
+    })();
+  }
+  return {sweep,redraw,clear(){ for(const k in curves) delete curves[k]; redraw(); }};
+}
+
+/* ---------- 4 扫频（频谱） ---------- */
+const sw4=makeSweeper('w4sweep', sigP, 500, null);
+el('w4go').onclick=()=>sw4.sweep('plain',RECT);
+
+/* ---------- 5a 两路探针抵消验证 ---------- */
+const c8b=cv('w8bars'), c8p=cv('w8prod');
+function w8set(f){ el('w8f').value=f; drawW8(); }
+function drawW8(){
+  const f=+el('w8f').value; el('w8fv').textContent=f;
+  const kind=document.querySelector('input[name=w8probe]:checked').value;
+  const prb=sigP.map((_,i)=> kind==='sin' ? Math.sin(2*Math.PI*f*i/SR) : Math.cos(2*Math.PI*f*i/SR));
+  const prod=sigP.map((v,i)=>v*prb[i]);
+  let pos=0,neg=0; for(const v of prod){ if(v>0)pos+=v; else neg+=v; }
+  const tot=pos+neg;
+  el('w8pos').textContent='+'+pos.toFixed(2);
+  el('w8neg').textContent=neg.toFixed(2);
+  const sumEl=el('w8sum');
+  sumEl.textContent=(Math.abs(tot)<1e-9?0:tot).toFixed(2);
+  sumEl.style.color=kind==='sin'?'#e53935':'#fb8c00';
+  const x=c8p.x; x.clearRect(0,0,c8p.W,c8p.H); zeroLine(x,c8p.W,c8p.H,-1.1,1.1);
+  const zy=c8p.H*(1-(0+1.1)/2.2);
+  for(let i=0;i<prod.length-1;i++){
+    const x1=i/(prod.length-1)*c8p.W, x2=(i+1)/(prod.length-1)*c8p.W;
+    const y=c8p.H*(1-(prod[i]+1.1)/2.2);
+    x.beginPath(); x.moveTo(x1,zy); x.lineTo(x1,y); x.lineTo(x2,zy); x.closePath();
+    x.fillStyle=prod[i]>=0?'rgba(67,160,71,.55)':'rgba(229,57,53,.55)'; x.fill();
+  }
+  curve(x,c8p.W,c8p.H,prod,'#6a1b9a',-1.1,1.1,1.5);
+  let ss=0,cc=0;
+  for(let i=0;i<N;i++){ ss+=sigP[i]*Math.sin(2*Math.PI*f*i/SR); cc+=sigP[i]*Math.cos(2*Math.PI*f*i/SR); }
+  const mag=Math.hypot(ss,cc), bx=c8b.x;
+  bx.clearRect(0,0,c8b.W,c8b.H); bx.font='13px sans-serif';
+  [['sin 探针',Math.abs(ss),'#e53935'],['cos 探针',Math.abs(cc),'#fb8c00'],['合并 √(a²+b²)',mag,'#43a047']].forEach((row,r)=>{
+    const y=8+r*28, w=Math.min(1,row[1]/64)*(c8b.W-210);
+    bx.fillStyle='#444'; bx.fillText(row[0],4,y+14);
+    bx.fillStyle=row[2]; bx.fillRect(150,y,w,18);
+    bx.fillStyle='#333'; bx.fillText(row[1].toFixed(1),155+w,y+14);
+  });
+}
+el('w8f').oninput=drawW8;
+document.querySelectorAll('input[name=w8probe]').forEach(r=>r.onchange=drawW8);
+drawW8();
+
+/* ---------- 5b 65 格柱状图 ---------- */
+const sigPresets={
+  pure:['纯音 500Hz', ()=>sigP],
+  dual:['双音 375+1000Hz', ()=>{ const a=sine(375,1,N), b=sine(1000,0.8,N);
+        return Array.from(a,(v,i)=>v+b[i]); }],
+  vowel:['类元音：125Hz 的前 10 次倍频叠加（幅度递减）', ()=>{
+        const out=new Array(N).fill(0);
+        for(let h=1;h<=10;h++) for(let i=0;i<N;i++) out[i]+=Math.sin(2*Math.PI*125*h*i/SR)/h;
+        return out; }],
+  noise:['白噪声（每个频率都有）', ()=>{ let s=7; const out=[];
+        for(let i=0;i<N;i++){ s=(s*16807)%2147483647; out.push(s/2147483647*2-1); } return out; }]
+};
+let curSig=sigP, gridScores=[];
+function recomputeGrid(){ gridScores=[]; for(let k=0;k<=64;k++) gridScores.push(probeScore(curSig,RECT,k*SR/N)); }
+function setSig(name){ const p=sigPresets[name]; curSig=p[1]();
+  el('w9sig').textContent='当前：'+p[0]; recomputeGrid(); drawGrid(); }
+const cG=cv('w9bars');
+function drawGrid(){
+  const k=+el('w9k').value;
+  el('w9kv').textContent=k;
+  el('w9kf').textContent=Math.round(k*SR/N);
+  el('w9ks').textContent=gridScores[k].toFixed(1);
+  const x=cG.x,W=cG.W,H=cG.H; x.clearRect(0,0,W,H);
+  x.strokeStyle='#bbb'; x.beginPath(); x.moveTo(34,6); x.lineTo(34,H-22); x.lineTo(W-6,H-22); x.stroke();
+  x.fillStyle='#666'; x.font='12px sans-serif';
+  for(let kk=0;kk<=64;kk+=16){ const px=34+(kk/64)*(W-44); x.fillText(kk+'格',px-10,H-6); }
+  const bw=(W-44)/65;
+  for(let kk=0;kk<=64;kk++){
+    const h=Math.min(H-44,gridScores[kk]/64*(H-44));
+    x.fillStyle=kk===k?'#e53935':'#90caf9';
+    x.fillRect(34+kk*bw, H-22-h, bw-1, h);
+  }
+  const sx=34+(k+0.5)*bw;
+  x.fillStyle='#e53935';
+  x.beginPath(); x.moveTo(sx-5,H-21); x.lineTo(sx+5,H-21); x.lineTo(sx,H-30); x.closePath(); x.fill();
+}
+el('w9k').oninput=drawGrid; recomputeGrid(); drawGrid();
+
+/* ---------- 6 频谱图 ---------- */
+const sig1s=new Float32Array(16000);
+for(let i=0;i<16000;i++){ const t=i/SR; sig1s[i]=Math.sin(2*Math.PI*(t<0.5?440:880)*t); }
+const HOP=32, FRAMES=Math.floor((16000-N)/HOP)+1, NB=65;
+const mags=[];
+for(let fr=0;fr<FRAMES;fr++){
+  const off=fr*HOP, col=new Float32Array(NB);
+  for(let k=0;k<NB;k++){
+    let re=0,im=0; const w=2*Math.PI*k/N;
+    for(let i=0;i<N;i++){ const v=sig1s[off+i]*HANN[i]; re+=v*Math.cos(w*i); im-=v*Math.sin(w*i); }
+    col[k]=Math.hypot(re,im);
+  }
+  mags.push(col);
+}
+let gmax=0; for(const col of mags) for(let k=0;k<NB;k++) gmax=Math.max(gmax,col[k]);
+function heat(v){ v=Math.min(1,Math.max(0,v));
+  const r=Math.round(255*Math.min(1,v*1.7)), g=Math.round(255*Math.min(1,Math.max(0,(v-0.35)*1.6))), b=Math.round(255*Math.min(1,Math.max(0,(v-0.05)*1.0)));
+  return 'rgb('+r+','+g+','+b+')'; }
+const off=document.createElement('canvas'); off.width=FRAMES; off.height=NB;
+const ox=off.getContext('2d');
+for(let fr=0;fr<FRAMES;fr++) for(let k=0;k<NB;k++){ ox.fillStyle=heat(mags[fr][k]/gmax); ox.fillRect(fr,NB-1-k,1,1); }
+const cW=cv('w4wave'), cB=cv('w4bars'), cGm=cv('w4gram');
+let cur=0;
+function drawW4(){
+  let x=cW.x; x.clearRect(0,0,cW.W,cW.H);
+  x.fillStyle='#1e88e5';
+  for(let px=0;px<cW.W;px++){
+    const s0=Math.floor(px/cW.W*16000), s1=Math.max(s0+1,Math.floor((px+1)/cW.W*16000));
+    let mn=1,mx=-1;
+    for(let i=s0;i<s1;i++){ if(sig1s[i]<mn)mn=sig1s[i]; if(sig1s[i]>mx)mx=sig1s[i]; }
+    const y1=cW.H*(1-(mx+1.05)/2.1), y2=cW.H*(1-(mn+1.05)/2.1);
+    x.fillRect(px,y1,1,Math.max(1,y2-y1));
+  }
+  const rx0=cur*HOP/16000*cW.W, rx1=(cur*HOP+N)/16000*cW.W;
+  x.strokeStyle='#e53935'; x.lineWidth=2; x.strokeRect(rx0,2,rx1-rx0,cW.H-4);
+  x=cB.x; x.clearRect(0,0,cB.W,cB.H);
+  const bw=cB.W/NB;
+  for(let k=0;k<NB;k++){ const h=mags[cur][k]/gmax*(cB.H-30);
+    x.fillStyle=heat(mags[cur][k]/gmax); x.fillRect(k*bw+1,cB.H-20-h,bw-2,h); }
+  x.fillStyle='#666'; x.font='11px sans-serif';
+  for(const k of [0,16,32,48,64]) x.fillText(k*125+'',Math.min(k*bw+1,cB.W-26),cB.H-6);
+  x.fillText('频率 Hz →',cB.W-70,cB.H-6);
+  x=cGm.x; x.imageSmoothingEnabled=false; x.clearRect(0,0,cGm.W,cGm.H);
+  const pxW=cGm.W/FRAMES;
+  x.drawImage(off,0,0,cur+1,NB, 0,0,(cur+1)*pxW,cGm.H);
+  x.fillStyle='rgba(255,255,255,.9)'; x.fillRect((cur+1)*pxW,0,2,cGm.H);
+  for(const f of [440,880]){ const y=cGm.H*(1-f/((NB-1)*125));
+    x.beginPath(); x.setLineDash([4,4]); x.moveTo(0,y); x.lineTo(cGm.W,y); x.strokeStyle='rgba(0,200,255,.7)'; x.lineWidth=1; x.stroke(); x.setLineDash([]);
+    x.fillStyle='rgba(0,200,255,.9)'; x.fillText(f+'Hz',4,y-3); }
+  x.fillStyle='rgba(238,238,238,.8)';
+  x.fillText('8000Hz',cGm.W-42,12); x.fillText('4000Hz',cGm.W-42,cGm.H/2+4); x.fillText('0Hz',cGm.W-28,cGm.H-16);
+  x.fillStyle='#eee'; x.font='11px sans-serif';
+  x.fillText('0s',2,cGm.H-4); x.fillText('0.5s',cGm.W/2-12,cGm.H-4); x.fillText('1s',cGm.W-16,cGm.H-4);
+  el('w4s').value=cur;
+}
+el('w4s').oninput=e=>{cur=+e.target.value; drawW4();};
+let timer=null;
+el('w4play').onclick=()=>{
+  if(timer){clearInterval(timer); timer=null; return;}
+  cur=0; drawW4();
+  timer=setInterval(()=>{ cur+=2; if(cur>=FRAMES-1){cur=FRAMES-1; clearInterval(timer); timer=null;} drawW4(); },50);
+};
+el('w4snd').onclick=()=>playBuf(sig1s);
+drawW4();
+
+/* ---------- 7 相位与两路探针 ---------- */
+const cPS=cv('w5phasesig'), cPB=cv('w5phasebars');
+function drawPhase(){
+  const deg=+el('w5phase').value; el('w5phasev').textContent=deg;
+  const ph=deg*Math.PI/180;
+  const sig=[],prb=[];
+  for(let i=0;i<N;i++){ sig.push(Math.sin(2*Math.PI*500*i/SR+ph)); prb.push(Math.sin(2*Math.PI*500*i/SR)); }
+  let x=cPS.x; x.clearRect(0,0,cPS.W,cPS.H); zeroLine(x,cPS.W,cPS.H,-1.1,1.1);
+  curve(x,cPS.W,cPS.H,sig,'#1e88e5',-1.1,1.1,2);
+  curve(x,cPS.W,cPS.H,prb,'#e53935',-1.1,1.1,1.5,[5,4]);
+  let ss=0,cc=0;
+  for(let i=0;i<N;i++){ ss+=sig[i]*Math.sin(2*Math.PI*500*i/SR); cc+=sig[i]*Math.cos(2*Math.PI*500*i/SR); }
+  const mag=Math.hypot(ss,cc), bx=cPB.x;
+  bx.clearRect(0,0,cPB.W,cPB.H); bx.font='13px sans-serif';
+  [['sin 探针得分 a',Math.abs(ss),'#e53935'],['cos 探针得分 b',Math.abs(cc),'#fb8c00'],['合并 √(a²+b²)',mag,'#43a047']].forEach((row,r)=>{
+    const y=8+r*28, w=Math.min(1,row[1]/64)*(cPB.W-210);
+    bx.fillStyle='#444'; bx.fillText(row[0],4,y+14);
+    bx.fillStyle=row[2]; bx.fillRect(150,y,w,18);
+    bx.fillStyle='#333'; bx.fillText(row[1].toFixed(1),155+w,y+14);
+  });
+}
+el('w5phase').oninput=drawPhase; drawPhase();
+
+/* ---------- 8 欧拉圆 ---------- */
+const cCi=cv('w7circle'), cWv=cv('w7wave');
+function drawEuler(){
+  const deg=+el('w7th').value; el('w7thv').textContent=deg;
+  const th=deg*Math.PI/180;
+  let x=cCi.x,cx=120,cyy=120,r=90;
+  x.clearRect(0,0,cCi.W,cCi.H);
+  x.beginPath(); x.arc(cx,cyy,r,0,7); x.strokeStyle='#ccc'; x.lineWidth=1.5; x.stroke();
+  x.beginPath(); x.moveTo(cx-r-14,cyy); x.lineTo(cx+r+14,cyy); x.moveTo(cx,cyy-r-14); x.lineTo(cx,cyy+r+14);
+  x.strokeStyle='#eee'; x.stroke();
+  const px=cx+r*Math.cos(th), py=cyy-r*Math.sin(th);
+  x.beginPath(); x.moveTo(cx,cyy); x.lineTo(px,cyy); x.strokeStyle='#1e88e5'; x.lineWidth=4; x.stroke();
+  x.beginPath(); x.moveTo(px,cyy); x.lineTo(px,py); x.strokeStyle='#e53935'; x.lineWidth=4; x.stroke();
+  x.beginPath(); x.moveTo(cx,cyy); x.lineTo(px,py); x.strokeStyle='#555'; x.lineWidth=1.5; x.stroke();
+  x.beginPath(); x.arc(px,py,6,0,7); x.fillStyle='#6a1b9a'; x.fill();
+  x.font='13px sans-serif';
+  x.fillStyle='#1e88e5'; x.fillText('cosθ='+Math.cos(th).toFixed(2),8,cCi.H-10);
+  x.fillStyle='#e53935'; x.fillText('sinθ='+Math.sin(th).toFixed(2),150,cCi.H-10);
+  x=cWv.x; x.clearRect(0,0,cWv.W,cWv.H);
+  const Y=v=>cWv.H/2-v*(cWv.H/2-16);
+  x.beginPath(); x.moveTo(0,Y(0)); x.lineTo(cWv.W,Y(0)); x.strokeStyle='#ddd'; x.stroke();
+  const cs=[],ss=[];
+  for(let d=0;d<=360;d+=3){ const a=d*Math.PI/180; cs.push(Math.cos(a)); ss.push(Math.sin(a)); }
+  x.beginPath(); cs.forEach((v,i)=>{ const p2=i/(cs.length-1)*cWv.W; i?x.lineTo(p2,Y(v)):x.moveTo(p2,Y(v)); });
+  x.strokeStyle='#1e88e5'; x.lineWidth=2; x.stroke();
+  x.beginPath(); ss.forEach((v,i)=>{ const p2=i/(ss.length-1)*cWv.W; i?x.lineTo(p2,Y(v)):x.moveTo(p2,Y(v)); });
+  x.strokeStyle='#e53935'; x.lineWidth=2; x.stroke();
+  const cxp=deg/360*cWv.W;
+  x.beginPath(); x.arc(cxp,Y(Math.cos(th)),5,0,7); x.fillStyle='#1e88e5'; x.fill();
+  x.beginPath(); x.arc(cxp,Y(Math.sin(th)),5,0,7); x.fillStyle='#e53935'; x.fill();
+  x.fillStyle='#1e88e5'; x.font='12px sans-serif'; x.fillText('cos',cWv.W-58,16);
+  x.fillStyle='#e53935'; x.fillText('sin',cWv.W-30,16);
+  x.fillStyle='#999'; x.fillText('0°',2,cWv.H-4); x.fillText('360°',cWv.W-30,cWv.H-4);
+}
+let eulTimer=null;
+el('w7play').onclick=()=>{
+  if(eulTimer){clearInterval(eulTimer); eulTimer=null; return;}
+  eulTimer=setInterval(()=>{ const s=el('w7th'); s.value=(+s.value+3)%361; drawEuler(); },60);
+};
+el('w7th').oninput=drawEuler; drawEuler();
+
+/* ---------- 9 泄漏与汉宁窗 ---------- */
+const sig550=Array.from(sine(550,1,N));
+const sw9=makeSweeper('w9spec', sig550, 550, 'w9abs');
+el('w9rect').onclick=()=>sw9.sweep('rect',RECT);
+el('w9hann').onclick=()=>sw9.sweep('hann',HANN);
+el('w9clear').onclick=()=>sw9.clear();
+el('w9abs').onchange=()=>sw9.redraw();
+const c1=cv('w1');
+function drawW1(){
+  const n=+el('w1N').value; el('w1Nv').textContent=n;
+  const x=c1.x,W=c1.W,H=c1.H;
+  x.clearRect(0,0,W,H); zeroLine(x,W,H,-1.25,1.25);
+  const cosC=[]; for(let i=0;i<256;i++) cosC.push(Math.cos(2*Math.PI*i/255));
+  curve(x,W,H,cosC,'#bbb',-1.25,1.25,1.5,[5,4]);
+  const zy=H*(1-(0+1.25)/2.5);
+  for(let i=0;i<n;i++){
+    const v=0.5*(1-Math.cos(2*Math.PI*i/(n-1)));
+    const px=i/(n-1)*W, py=H*(1-(v+1.25)/2.5);
+    x.strokeStyle='rgba(30,136,229,.30)'; x.lineWidth=1;
+    x.beginPath(); x.moveTo(px,zy); x.lineTo(px,py); x.stroke();
+    x.fillStyle='#1e88e5';
+    x.beginPath(); x.arc(px,py,Math.max(1.6,150/n),0,7); x.fill();
+  }
+  x.fillStyle='#666'; x.font='13px sans-serif';
+  x.fillText('1.0',4,14); x.fillText('0',8,zy-6); x.fillText('-1.0',4,H-6);
+  x.fillText('汉宁窗 = 这 N 个蓝色点（一条长度为 N 的数组）',190,H-8);
+}
+el('w1N').oninput=drawW1; drawW1();
+
+/* ---------- 10.1 hop ---------- */
+const sig480=Array.from(sig1s.slice(0,480));
+const cOne=cv('w6one'), cCut=cv('w6cut'), cTwo=cv('w6two');
+function drawOne(){
+  const x=cOne.x; x.clearRect(0,0,cOne.W,cOne.H);
+  curve(x,cOne.W,cOne.H,sig480,'#1e88e5',-1.1,1.1,1.5);
+  const X=s=>s/480*cOne.W;
+  x.strokeStyle='#1e88e5'; x.lineWidth=2.5; x.strokeRect(X(0),4,X(128)-X(0),cOne.H-8);
+  x.fillStyle='#1e88e5'; x.font='12px sans-serif'; x.fillText('窗口：第 0~127 点，共 128 点',X(4),16);
+  const c=cCut.x; c.clearRect(0,0,cCut.W,cCut.H); zeroLine(c,cCut.W,cCut.H,-1.1,1.1);
+  curve(c,cCut.W,cCut.H,sig480.slice(0,128),'#6a1b9a',-1.1,1.1,2);
+  c.fillStyle='#6a1b9a'; c.font='12px sans-serif'; c.fillText('剪出的片段（128 点，拉宽展示）',6,16);
+}
+function drawTwo(){
+  const hop=+el('w6hop').value;
+  el('w6hopv').textContent=hop;
+  const ov=N-hop;
+  el('w6ov').textContent=ov;
+  el('w6ovp').textContent=Math.round(ov/N*100)+'%';
+  el('w6nf').textContent=Math.floor((480-N)/hop)+1;
+  const x=cTwo.x,W=cTwo.W,H=cTwo.H; x.clearRect(0,0,W,H);
+  const X=s=>s/480*W;
+  if(hop<128){ x.fillStyle='rgba(106,27,154,.15)'; x.fillRect(X(hop),0,X(128)-X(hop),H); }
+  curve(x,W,H,sig480,'#555',-1.1,1.1,1.5);
+  x.strokeStyle='#1e88e5'; x.lineWidth=2.5; x.strokeRect(X(0),6,X(128)-X(0),H-12);
+  x.strokeStyle='#e53935'; x.strokeRect(X(hop),10,X(hop+128)-X(hop),H-20);
+  x.fillStyle='#1e88e5'; x.font='12px sans-serif'; x.fillText('窗口① 起点 0',X(2),20);
+  x.fillStyle='#e53935'; x.fillText('窗口② 起点 '+hop,X(hop+3),34);
+  if(el('w6all').checked){
+    x.strokeStyle='rgba(76,175,80,.45)'; x.lineWidth=1;
+    for(let f=2;f*hop+N<=480;f++) x.strokeRect(X(f*hop),4,X(f*hop+N)-X(f*hop),H-8);
+  }
+}
+el('w6hop').oninput=drawTwo; el('w6all').onchange=drawTwo;
+drawOne(); drawTwo();
+
+/* ---------- 10.2 center/pad ---------- */
+const cC=cv('w5centerc');
+function drawCenter(){
+  const centerOn=el('w5center').checked;
+  const mode=el('w5pad').value;
+  const x=cC.x,W=cC.W,H=cC.H; x.clearRect(0,0,W,H);
+  const s0=-64,s1=256,span=s1-s0;
+  const X=s=>(s-s0)/span*W, Y=v=>H*(1-(v+1.05)/2.1);
+  if(centerOn){
+    x.fillStyle='rgba(0,0,0,.06)'; x.fillRect(X(s0),0,X(0)-X(s0),H);
+    x.beginPath();
+    if(mode==='reflect'){
+      for(let s=s0;s<0;s++){ const px=X(s),py=Y(sig1s[-s]); s===s0?x.moveTo(px,py):x.lineTo(px,py); }
+    } else { x.moveTo(X(s0),Y(0)); x.lineTo(X(0),Y(0)); }
+    x.strokeStyle='#999'; x.lineWidth=2; x.setLineDash([4,3]); x.stroke(); x.setLineDash([]);
+  }
+  x.beginPath();
+  for(let s=0;s<s1;s++){ const px=X(s),py=Y(sig1s[s]); s===0?x.moveTo(px,py):x.lineTo(px,py); }
+  x.strokeStyle='#1e88e5'; x.lineWidth=2; x.stroke();
+  const a=centerOn?-64:0, b=centerOn?64:128;
+  x.strokeStyle='#e53935'; x.lineWidth=2; x.strokeRect(X(a),6,X(b)-X(a),H-12);
+  x.font='12px sans-serif'; x.fillStyle='#e53935';
+  x.fillText(centerOn?'第一个窗口 = [−64, 64)：左半盖在补的数据上，中心对齐第 0 个采样点':'第一个窗口 = [0, 128)：第 0 帧从开头才开始',X(-56),20);
+  x.fillStyle='#888';
+  x.fillText(centerOn?'← 补出来的区域（'+(mode==='reflect'?'镜像':'零')+'）':'center=False：两端什么都不补',X(-56),H-8);
+  x.fillText('真实信号起点 →',X(2),H-8);
+}
+el('w5center').onchange=drawCenter; el('w5pad').onchange=drawCenter;
+drawCenter();
+</script>
+</body>
+</html>
