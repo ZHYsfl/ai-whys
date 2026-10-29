@@ -44,7 +44,11 @@ $$
 
 Codec 就是来解决这两件事的：先把波形压成低帧率的离散整数，语言模型只需要学这些整数；生成时再解码回波形。
 
-#### 实验 40：neural audio codec 的完整实现及训练
+![codec&GAN](pics/31.png)
+
+Codec的训练可以使用GAN（生成对抗网络），具体逻辑见实验代码学习即可。
+
+#### 实验 40：neural audio codec 的完整实现及训练(含GAN方法)
 >
 > `code/codec/`
 > 
