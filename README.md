@@ -3,15 +3,15 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ZHYsfl/ai-whys/pulls)
 
-> 一个系统性的 AI 学习路线：**39 个实验、17 章笔记**，从线性回归到 BERT、从 Q-learning 到 PPO，每个算法都从零实现，并讲清每个"为什么"。
+> 一个系统性的 AI 学习路线：**40 个实验、18 章笔记**，从线性回归到 BERT、从 Q-learning 到 PPO、从波形到 neural audio codec，每个算法都从零实现，并讲清每个"为什么"。
 >
 > **作者：周浩洋**（上海交通大学 AI 学院博士在读）· 欢迎交流：**zhouhy5523@gmail.com** · 也欢迎提交 PR、开 issue
 
 ![架构图](pics/arch.png)
 
-## 39 个实验
+## 40 个实验
 
-共 **39 个实验**，编号与两份笔记中的实验声明一一对应（[dl.md](dl.md) 实验 1–33 与 39，[rl.md](rl.md) 实验 34–38）。每个实验都有三样东西：**数学推导笔记**（dl.md / rl.md）、**Excalidraw 插图**（pics/）、**可运行的代码**（code/）——下面清单中，每个实验都附上了笔记原文和代码的直达链接：
+共 **40 个实验**，编号与三份笔记中的实验声明一一对应（[dl.md](dl.md) 实验 1–33 与 39，[rl.md](rl.md) 实验 34–38，[audio-dl.md](audio-dl.md) 实验 40）。每个实验都有三样东西：**数学推导笔记**（dl.md / rl.md / audio-dl.md）、**Excalidraw 插图**（pics/）、**可运行的代码**（code/）——下面清单中，每个实验都附上了笔记原文和代码的直达链接：
 
 ### 基础
 
@@ -67,16 +67,20 @@
 37. **Actor-Critic** — [笔记](rl.md#实验37actor-critic-的实现) / [code](code/actor_critic/actor_critic.py)
 38. **PPO**（已迁移至 gymnasium 最新版 API）— [笔记](rl.md#实验38ppo-的实现) / [code](code/actor_critic/ppo.py)
 
+### 音频（语音AI和语音大模型方向）
+
+40. **Neural Audio Codec**（全卷积 autoencoder + RVQ + GAN对抗训练）— [笔记](audio-dl.md) / [code](code/codec/)（独立 uv 项目，使用方式见 [code/codec/README.md](code/codec/README.md)）
+
 ## 这个项目适合谁
 
-- **想系统性学 AI、但不知道从何开始的本科生**——不需要先修成堆的理论，跟着实验 1 → 39 的顺序走，就是一条完整的深度学习 + 强化学习入门路线。
+- **想系统性学 AI、但不知道从何开始的本科生**——不需要先修成堆的理论，跟着实验 1 → 40 的顺序走，就是一条完整的深度学习 + 强化学习 + 语音AI入门路线。
 - **即将入学的研究生**——把它当作入学前自查清单：每个实验背后的"为什么"，如果你能全部讲清楚，基础就算过关；讲不清楚的，就是开学前该补的课。
 
 ## 每个实验都从三个层面拆解
 
 同一个知识点，三种互补的打开方式：
 
-- **数学推导**（[dl.md](dl.md) / [rl.md](rl.md)）——每个算法从公式推起，符号约定统一（大写为矩阵、小写为标量），先弄清"为什么"再谈"怎么用"
+- **数学推导**（[dl.md](dl.md) / [rl.md](rl.md) / [audio-dl.md](audio-dl.md)）——每个算法从公式推起，符号约定统一（大写为矩阵、小写为标量），先弄清"为什么"再谈"怎么用"
 - **插图总结**（[pics/](pics)）——30 余张 Excalidraw 手绘风插图，把网络架构、数据流向和张量形状对齐画出来，一张图胜过一页文字
 - **复现代码**（[code/](code)）——从零实现 + 大量中文注释，每个"为什么"都对应一段能跑、能改的代码
 
@@ -84,7 +88,7 @@
 
 这份材料是一个**精炼的总结**：它不追求把每个细节讲满，而是给出路线、推导主干和关键问题，细节留白交给学习过程本身。因此最好的使用方式是——**把它当作地图，结合 AI coding agent（如 Kimi Code、Claude Code、Cursor 等）一起学**：
 
-- **笔记定路线**：按实验 1 → 39 的顺序读 [dl.md](dl.md) / [rl.md](rl.md)，先建立整体脉络，推导卡住的地方直接问 agent
+- **笔记定路线**：按实验 1 → 40 的顺序读 [dl.md](dl.md) / [rl.md](rl.md) / [audio-dl.md](audio-dl.md)，先建立整体脉络，推导卡住的地方直接问 agent
 - **agent 陪跑细节**：每个实验的代码让 agent 逐行讲解、补齐跳步的推导、搭好环境跑通结果、改参数做对照实验——笔记里记下的那些"为什么"，就是现成的提问起点
 - **输出自己的版本**：学完一个实验后合上笔记，让 agent 抽查你能否讲清背后的"为什么"；讲不清的，回到笔记补
 
@@ -105,14 +109,16 @@
 
 - **dl.md**：深度学习笔记，17 章，配套《动手学深度学习》，覆盖线性回归 → CNN/ResNet → RNN/GRU/LSTM → 注意力/Transformer/BERT
 - **rl.md**：强化学习笔记，配套《动手学强化学习》（持续更新中）
+- **audio-dl.md**：语音/音频深度学习笔记，第一章 neural audio codec（持续更新中）
 - **dl_and_rl.svg / dl_and_rl.excalidraw**：学科全景架构图，SVG 矢量版 + Excalidraw 可编辑源文件，可见 DL 与 RL 的知识脉络如何串成一体（`pics/arch.png` 为同一张图的 PNG 导出）
-- **pics/**：30 张原创插图（Excalidraw 绘制）
+- **pics/**：30 余张原创插图（Excalidraw 绘制）
 
 ## 运行环境
 
 - Python 3.14，推荐使用 [uv](https://docs.astral.sh/uv/) 管理虚拟环境
 - 安装依赖：`uv pip install -r requirements.txt`
 - 深度学习部分依赖 PyTorch；强化学习部分已迁移至 [gymnasium](https://gymnasium.farama.org/) 最新版 API
+- `code/codec/` 是独立的 uv 项目（Python 3.12，含自己的 lock 与测试），不进根目录的 requirements.txt，使用方式见 [code/codec/README.md](code/codec/README.md)
 - 注意：`d2l` 包对 torch/numpy 有较严格的版本 pin，若与已装的 PyTorch 冲突，改用 `uv pip install d2l --no-deps` 单独安装
 
 ## 许可证与致谢
@@ -123,6 +129,7 @@
 
 - **深度学习代码**改写自[《动手学深度学习》](https://zh.d2l.ai)（[d2l-ai/d2l-zh](https://github.com/d2l-ai/d2l-zh)，原内容以 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 发布），在学习过程中加入了大量中文注释与工程改进；
 - **强化学习代码**改写自[《动手学强化学习》](https://hrl.boyuai.com)（[boyu-ai/Hands-on-RL](https://github.com/boyu-ai/Hands-on-RL)，原代码以 Apache-2.0 发布），并迁移至 gymnasium 最新版 API；
+- **音频 codec 代码**（[code/codec/](code/codec/)）为本项目独立重写的教学实现，架构参照 SoundStream / EnCodec / DAC 等经典工作，各原仓库许可证与合规要点见 [code/codec/REFERENCES.md](code/codec/REFERENCES.md)；
 - 训练工具依赖 [d2l PyPI 包](https://pypi.org/project/d2l/)（MIT-0）。
 
 笔记（dl.md / rl.md）与插图（pics/）为本项目原创内容。
