@@ -1,0 +1,27 @@
+[project]
+name = "teaching-version-codec"
+version = "0.1.0"
+description = "A data-flow-first neural audio codec for learning"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+    "numpy>=1.26,<2.3",
+    "soundfile>=0.12,<1.0",
+    "torch>=2.8,<2.10",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
