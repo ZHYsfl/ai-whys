@@ -71,8 +71,7 @@ def generator_step(
     adversarial = torch.zeros((), device=batch.device)
     feature_matching = torch.zeros((), device=batch.device)
     if discriminator is not None:
-        with torch.no_grad():
-            _, real_features = discriminator(batch)
+        _, real_features = discriminator(batch)
         fake_scores, fake_features = discriminator(output.reconstruction)
         adversarial = generator_adversarial_loss(fake_scores)
         feature_matching = feature_matching_loss(real_features, fake_features)
