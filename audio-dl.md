@@ -54,3 +54,39 @@ Codec的训练可以使用GAN（生成对抗网络），具体逻辑见实验代
 > 
 > 环境与全部使用步骤（uv 安装、四步训练/评估/编解码流程）见 [`code/codec/README.md`](code/codec/README.md)。
 
+---
+
+## 二、automatic speech recognition (ASR)
+
+Codec 的目标是重建声音，ASR 的目标则是把声音变成文字。输入波形长度是 $N$，输出文本长度是 $U$，二者不同且没有逐帧人工对齐：
+
+$$
+x:[B,N],\qquad y:[B,U]
+$$
+
+ASR 的核心问题不是简单地把 RNN 换成 Transformer，而是：**怎样对齐两条长度不同的序列，怎样用这个目标训练，又怎样在推理时得到文本。**
+
+本部分并列实现两条现代路线，不把任何一条当成另一条的附属品。
+
+### 1. 非自回归路线：Conformer + CTC (includes RoPE)
+
+![confromer approach](pics/32.png)
+
+### 2. LLM 路线：AuT + projector + Qwen3-style LM (includes RoPE)
+
+Qwen3-ASR 的代表性结构不是“音频直接塞进一个黑盒大模型”，而是多阶段数据流：
+
+1. **AuT 预训练**：AuT encoder + Transformer decoder，以 AED 方式学习语音到文本。
+2. **ASR SFT**：复用 AuT encoder，接 projector，把语音 embedding 放入 decoder-only LLM 的输入序列。
+3. **生成**：LLM 逐 token 输出文本，用 KV cache 避免每个新 token 都重算整段历史。
+
+![AuT approach](pics/33.png)
+
+教学版从零实现上述两条路线（但教学版不声称复现 Qwen3-ASR 的大规模能力（需要大规模的数据以及训练））。
+
+#### 实验 41：Conformer-CTC 与 AuT/Qwen3-ASR 的完整实现
+>
+> `code/asr/`
+>
+> 两条路线的环境、合成/真实训练、验证集选模、独立转录和形状检查见 [`code/asr/README.md`](code/asr/README.md)。论文、仓库阅读顺序与许可证见 [`code/asr/REFERENCES.md`](code/asr/REFERENCES.md)。
+
