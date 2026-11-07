@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mel 滤波器组 · 从两条斜线到 80 个频带</title>
+<style>
+  :root { --blue:#2563eb; --orange:#ea580c; --green:#059669; --purple:#7c3aed; --ink:#172033; --muted:#64748b; }
+  * { box-sizing:border-box; }
+  body { font-family:system-ui,"Noto Sans CJK SC",sans-serif; max-width:960px; margin:24px auto; padding:0 16px 40px; color:var(--ink); line-height:1.7; }
+  h1 { font-size:26px; margin-bottom:4px; } h2 { font-size:21px; margin:0 0 8px; } h3 { font-size:16px; margin:12px 0 4px; }
+  section { border:1px solid #dbe2ec; border-radius:12px; padding:18px 22px; margin:18px 0; box-shadow:0 2px 8px #0f172a08; }
+  canvas { display:block; width:100%; height:auto; border:1px solid #d8e0ea; border-radius:8px; background:#fff; margin:10px 0; cursor:crosshair; }
+  button { font-size:14px; padding:6px 12px; margin:4px 6px 4px 0; border:1px solid #94a3b8; border-radius:6px; background:#f8fafc; color:var(--ink); cursor:pointer; }
+  button:hover, button.active { background:#e0eaff; border-color:var(--blue); }
+  input[type=range] { width:min(430px,65vw); vertical-align:middle; accent-color:var(--blue); }
+  code,.formula { font-family:ui-monospace,SFMono-Regular,monospace; }
+  code { background:#f1f5f9; padding:2px 5px; border-radius:4px; }
+  .formula { background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px 14px; overflow-x:auto; white-space:nowrap; }
+  .blue { color:var(--blue); } .orange { color:var(--orange); } .green { color:var(--green); } .purple { color:var(--purple); }
+  .muted { color:var(--muted); font-size:14px; }
+  .key { background:#ecfdf5; border-left:4px solid var(--green); padding:9px 13px; border-radius:5px; margin-top:10px; }
+  .tip { background:#fff7ed; border-left:4px solid var(--orange); padding:9px 13px; border-radius:5px; margin-top:10px; }
+  .calc { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:10px 0; }
+  .card { border:1px solid #dbe2ec; border-radius:8px; padding:10px 12px; background:#fff; }
+  .result { font-size:20px; font-weight:700; }
+  .toc a { display:inline-block; margin:3px 10px 3px 0; color:var(--blue); text-decoration:none; }
+  .shape { display:inline-block; background:#eef2ff; color:#3730a3; padding:3px 9px; border-radius:5px; font-family:ui-monospace,monospace; margin:3px; }
+  .steps { display:flex; align-items:center; justify-content:center; flex-wrap:wrap; gap:8px; text-align:center; }
+  .step { border:1px solid #cbd5e1; border-radius:8px; padding:9px 13px; background:#fff; }
+  @media (max-width:650px) { .calc { grid-template-columns:1fr; } section { padding:14px; } }
+</style>
+</head>
+<body>
+<h1>Mel 滤波器组：从两条斜线开始</h1>
+<p>只配套 <code>features.py</code> 的 <code>mel_filterbank()</code> 与 <code>torch.matmul(self.filters, power)</code>。每一节都先动手，再收敛到代码。</p>
+<p class="toc"><a href="#s1">1 一个频率点</a><a href="#s2">2 一个滤波器</a><a href="#s3">3 Mel 尺子</a><a href="#s4">4 80 个三角形</a><a href="#s5">5 矩阵收敛</a></p>
+
+<section id="s1">
+<h2>1. 一个频率点：rising 和 falling 到底在算什么？</h2>
+<p>先只看一个三角形。固定 <b>左端 L=120 Hz，中心 C=200 Hz，右端 U=280 Hz</b>。拖动当前频率 <b>f</b>，或者点击图中的位置：</p>
+<p>f = <input id="oneF" type="range" min="0" max="400" value="160" step="1"> <b><span id="oneFV">160</span> Hz</b></p>
+<p>
+<button data-onef="80">80：左边外</button><button data-onef="120">120：左端</button><button data-onef="160">160：左半边</button>
+<button data-onef="200">200：中心</button><button data-onef="240">240：右半边</button><button data-onef="280">280：右端</button><button data-onef="320">320：右边外</button>
+</p>
+<canvas id="oneCanvas" width="860" height="290"></canvas>
+<div class="calc">
+  <div class="card"><b class="blue">rising：从左端起，走了中心到左端距离的多少倍</b><div id="risingCalc" class="formula"></div></div>
+  <div class="card"><b class="orange">falling：到右端还剩多少距离，以右半宽为单位</b><div id="fallingCalc" class="formula"></div></div>
+</div>
+<div id="oneResult" class="formula result"></div>
+<div class="key">在三角形内部，<span class="blue">rising</span> 负责左斜边，<span class="orange">falling</span> 负责右斜边；<code>min</code> 总能选到当前该用的那条斜边。三角形外的负数被 <code>clamp_min(0)</code> 截成 0，所以远处频率不参与。</div>
+</section>
+
+<section id="s2">
+<h2>2. 一个滤波器：把频率格的能量加权求和</h2>
+<p>还是这个三角形。下面每根蓝柱是一个 STFT 频率格的功率，绿线是权重，紫柱是两者的乘积。<b>点击蓝柱</b>，可以让那个频率格单独拥有能量：</p>
+<p><button id="powerOriginal">恢复示例功率</button><button id="powerOutside">只让 400 Hz 有能量</button><button id="powerMixed">三角形内外都有能量</button></p>
+<canvas id="powerCanvas" width="860" height="250"></canvas>
+<canvas id="productCanvas" width="860" height="180"></canvas>
+<div id="filterSum" class="formula result"></div>
+<div class="key">一个滤波器最终只输出一个数：<b>所有频率格的“功率 × 权重”之和</b>。400 Hz 即使有很强的能量，只要这个三角形在 400 Hz 的权重是 0，它对这个滤波器的输出就没有贡献。</div>
+</section>
+
+<section id="s3">
+<h2>3. Mel 空间：不是新信号，只是给频率换一把尺子</h2>
+<p>上方是 Hz 坐标，下方是 Mel 坐标。拖动同一个频率点，看它在两把尺子上的位置：</p>
+<p>f = <input id="melF" type="range" min="0" max="8000" value="1000" step="10"> <b><span id="melFV">1000</span> Hz = <span id="melMV">1000</span> Mel</b></p>
+<p><button data-melf="100">100 Hz</button><button data-melf="400">400 Hz</button><button data-melf="1000">1000 Hz</button><button data-melf="2000">2000 Hz</button><button data-melf="4000">4000 Hz</button><button data-melf="8000">8000 Hz</button></p>
+<p>在尺子上等距摆 6 个点：<button id="equalHz">Hz 等距</button><button id="equalMel" class="active">Mel 等距</button><span class="muted">重点看换回 Hz 后，点的间隔如何变化。</span></p>
+<canvas id="melCanvas" width="860" height="350"></canvas>
+<div id="melGaps" class="formula"></div>
+<div class="formula">Mel = 2595 × log10(1 + Hz / 700)　　⇄　　Hz = 700 × (10^(Mel / 2595) − 1)</div>
+<div class="key">选择 <b>Mel 等距</b>：低频的 Hz 间隔小，滤波器可以窄；高频的 Hz 间隔大，滤波器可以宽。这就是“低频分得细，高频分得粗”。</div>
+</section>
+
+<section id="s4">
+<h2>4. 82 个点，组成 80 个相邻的三角形</h2>
+<p>现在使用项目真实配置：<code>sr=16000, n_fft=400, n_mels=80</code>。在 Mel 空间等距取 82 点，相邻三点构成一个三角形。拖动编号或点击图形选择滤波器：</p>
+<p>m = <input id="bankM" type="range" min="0" max="79" value="20" step="1"> <b>第 <span id="bankMV">20</span> 个</b></p>
+<p><button data-bankm="0">第 0 个</button><button data-bankm="20">第 20 个</button><button data-bankm="40">第 40 个</button><button data-bankm="60">第 60 个</button><button data-bankm="79">第 79 个</button></p>
+<canvas id="bankCanvas" width="860" height="330"></canvas>
+<div id="bankInfo" class="formula"></div>
+<p class="muted">把选中的三角形放大：竖线是 STFT 的 40 Hz 频率格，圆点是它实际拿到的权重。</p>
+<canvas id="zoomCanvas" width="860" height="220"></canvas>
+<div class="key">每行有 201 个权重，共 80 行，所以 <span class="shape">filters [80,201]</span>。三角形之间共享端点，因此 80 个三角形只需要 82 个 Mel 锚点，而不是 240 个。</div>
+</section>
+
+<section id="s5">
+<h2>5. 收敛：201 个频率格如何变成 80 个 Mel 能量</h2>
+<p>下面使用完整的 201 格功率谱和 80 个真实滤波器。选择信号，再拖动滤波器编号：</p>
+<p><button id="signalDual" class="active">双峰信号</button><button id="signalLow">低频信号</button><button id="signalNoise">确定性噪声</button>
+　m = <input id="applyM" type="range" min="0" max="79" value="20" step="1"> <b><span id="applyMV">20</span></b></p>
+<canvas id="fullPowerCanvas" width="860" height="250"></canvas>
+<canvas id="fullMelCanvas" width="860" height="230"></canvas>
+<div id="applyInfo" class="formula result"></div>
+<div class="steps">
+  <div class="step">一个窗口的功率<br><span class="shape">power [201]</span></div><b>→</b>
+  <div class="step">80 行权重分别做点积<br><span class="shape">filters [80,201]</span></div><b>→</b>
+  <div class="step">80 个频带能量<br><span class="shape">mel [80]</span></div>
+</div>
+<div class="formula">mel[m] = Σ<sub>k=0…200</sub> filters[m,k] × power[k]<br><br>filters [80,201] @ power [B,201,S] → mel [B,80,S]</div>
+<div class="key">第 1 节是一个格子的权重；第 2 节是一行对 201 格求和；第 3、4 节决定 80 行各放在哪里；本节把它们合成一次矩阵乘法。</div>
+</section>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const fmt = (x,n=2) => Number(x).toFixed(n);
+const hzToMel = f => 2595*Math.log10(1+f/700);
+const melToHz = m => 700*(10**(m/2595)-1);
+const clamp = (x,lo,hi) => Math.max(lo,Math.min(hi,x));
+function ctx(id){ const c=$(id),g=c.getContext("2d"); g.clearRect(0,0,c.width,c.height); return {c,g,W:c.width,H:c.height}; }
+function line(g,x1,y1,x2,y2,color="#64748b",width=1,dash=[]){ g.beginPath();g.setLineDash(dash);g.moveTo(x1,y1);g.lineTo(x2,y2);g.strokeStyle=color;g.lineWidth=width;g.stroke();g.setLineDash([]); }
+function label(g,s,x,y,color="#172033",size=13,align="left"){ g.fillStyle=color;g.font=`${size}px system-ui`;g.textAlign=align;g.fillText(s,x,y); }
+function axes(g,W,H,pad,xMax,yMax,xName,yName){
+  line(g,pad.l,H-pad.b,W-pad.r,H-pad.b);line(g,pad.l,pad.t,pad.l,H-pad.b);
+  for(let i=0;i<=4;i++){const x=pad.l+(W-pad.l-pad.r)*i/4;const y=H-pad.b-(H-pad.t-pad.b)*i/4;
+    line(g,x,H-pad.b,x,H-pad.b+5);label(g,fmt(xMax*i/4,0),x,H-pad.b+20,"#64748b",12,"center");
+    line(g,pad.l-5,y,pad.l,y);label(g,fmt(yMax*i/4,1),pad.l-9,y+4,"#64748b",12,"right");}
+  label(g,xName,W-pad.r,H-8,"#64748b",12,"right");label(g,yName,pad.l+5,pad.t-8,"#64748b",12);
+}
+function weight(f,l,c,u){ return Math.max(0,Math.min((f-l)/(c-l),(u-f)/(u-c))); }
+
+// 1. One point on one triangle.
+const L=120,C=200,U=280;
+function drawOne(){
+  const f=Number($("oneF").value),r=(f-L)/(C-L),d=(U-f)/(U-C),raw=Math.min(r,d),w=Math.max(0,raw);
+  $("oneFV").textContent=f;
+  $("risingCalc").innerHTML=`(${f} − 120) / (200 − 120)<br>= ${f-120} / 80 = <b>${fmt(r)}</b>`;
+  $("fallingCalc").innerHTML=`(280 − ${f}) / (280 − 200)<br>= ${280-f} / 80 = <b>${fmt(d)}</b>`;
+  $("oneResult").innerHTML=`min(<span class="blue">${fmt(r)}</span>, <span class="orange">${fmt(d)}</span>) = ${fmt(raw)}　→　clamp_min(0) = <span class="green">${fmt(w)}</span>`;
+  const {g,W,H}=ctx("oneCanvas"),p={l:55,r:25,t:30,b:48},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const X=x=>p.l+x/400*pw,Y=y=>H-p.b-y/1.2*ph;
+  line(g,p.l,H-p.b,W-p.r,H-p.b);line(g,p.l,p.t,p.l,H-p.b);
+  [0,0.5,1].forEach(v=>{line(g,p.l-5,Y(v),p.l,Y(v));label(g,fmt(v,1),p.l-10,Y(v)+4,"#64748b",12,"right");});
+  for(let x=0;x<=400;x+=40){line(g,X(x),H-p.b,X(x),H-p.b+5);label(g,String(x),X(x),H-p.b+20,"#64748b",12,"center");}
+  label(g,"频率 f (Hz)",W-p.r,H-7,"#64748b",12,"right");label(g,"最终权重",p.l+5,p.t-9,"#64748b",12);
+  g.beginPath();[L,C,U].forEach((x,i)=>{const px=X(x),py=Y(weight(x,L,C,U));i?g.lineTo(px,py):g.moveTo(px,py);});g.strokeStyle="#059669";g.lineWidth=4;g.stroke();
+  [[L,"L=120"],[C,"C=200"],[U,"U=280"]].forEach(([x,s])=>{line(g,X(x),Y(0),X(x),Y(0)+6,"#059669",2);label(g,s,X(x),Y(0)+35,"#059669",12,"center");});
+  line(g,X(f),Y(0),X(f),Y(Math.max(w,0.02)),"#7c3aed",2,[5,4]);
+  g.beginPath();g.arc(X(f),Y(w),6,0,2*Math.PI);g.fillStyle=w>0?"#7c3aed":"#94a3b8";g.fill();
+  label(g,`f=${f}, w=${fmt(w)}`,clamp(X(f)+8,p.l+60,W-100),Y(Math.max(w,0.08))-8,"#7c3aed",14);
+  label(g,"绿色三角形 = 已经算好的最终权重；紫色点 = 当前 f",p.l+12,p.t+10,"#64748b",13);
+}
+$("oneF").addEventListener("input",drawOne);
+document.querySelectorAll("[data-onef]").forEach(b=>b.addEventListener("click",()=>{$("oneF").value=b.dataset.onef;drawOne();}));
+$("oneCanvas").addEventListener("click",e=>{const r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*e.target.width;$("oneF").value=Math.round(clamp((x-55)/(860-55-25),0,1)*400);drawOne();});
+
+// 2. One filter applied to a small power spectrum.
+const smallFreq=Array.from({length:11},(_,i)=>i*40);
+const originalPower=[0,0,0,2,4,10,8,6,0,0,0];
+let smallPower=originalPower.slice();
+function drawPower(){
+  const weights=smallFreq.map(f=>weight(f,L,C,U)),products=smallPower.map((v,i)=>v*weights[i]);
+  const sum=products.reduce((a,b)=>a+b,0),maxP=Math.max(10,...smallPower);
+  const {g,W,H}=ctx("powerCanvas"),p={l:50,r:20,t:28,b:42},pw=W-p.l-p.r,ph=H-p.t-p.b;
+  const X=i=>p.l+(i+0.5)/11*pw,Y=v=>H-p.b-v/maxP*ph;
+  line(g,p.l,H-p.b,W-p.r,H-p.b);
+  smallFreq.forEach((f,i)=>{const bw=pw/11*0.55;g.fillStyle="#2563eb";g.fillRect(X(i)-bw/2,Y(smallPower[i]),bw,H-p.b-Y(smallPower[i]));label(g,String(f),X(i),H-p.b+20,"#64748b",11,"center");label(g,fmt(smallPower[i],0),X(i),Y(smallPower[i])-5,"#2563eb",11,"center");});
+  g.beginPath();weights.forEach((w,i)=>{const y=H-p.b-w*ph;i?g.lineTo(X(i),y):g.moveTo(X(i),y);});g.strokeStyle="#059669";g.lineWidth=3;g.stroke();
+  label(g,"蓝柱：power　绿线：weight（0～1，单独使用纵向尺度）",p.l,p.t-10,"#64748b",13);label(g,"Hz",W-25,H-7,"#64748b",12);
+  const q=ctx("productCanvas"),qg=q.g,qW=q.W,qH=q.H,qp={l:50,r:20,t:30,b:40},qpw=qW-qp.l-qp.r,qph=qH-qp.t-qp.b;
+  const QX=i=>qp.l+(i+0.5)/11*qpw,QY=v=>qH-qp.b-v/10*qph;
+  line(qg,qp.l,qH-qp.b,qW-qp.r,qH-qp.b);
+  products.forEach((v,i)=>{const bw=qpw/11*0.55;qg.fillStyle="#7c3aed";qg.fillRect(QX(i)-bw/2,QY(v),bw,qH-qp.b-QY(v));label(qg,fmt(v,1),QX(i),QY(v)-5,"#7c3aed",11,"center");});
+  label(qg,"紫柱：power × weight",qp.l,qp.t-10,"#64748b",13);
+  const terms=products.map(v=>fmt(v,1)).join(" + ");
+  $("filterSum").innerHTML=`输出 = Σ(power × weight)<br>= ${terms}<br>= <span class="purple">${fmt(sum,1)}</span>`;
+}
+$("powerOriginal").addEventListener("click",()=>{smallPower=originalPower.slice();drawPower();});
+$("powerOutside").addEventListener("click",()=>{smallPower=smallFreq.map(f=>f===400?10:0);drawPower();});
+$("powerMixed").addEventListener("click",()=>{smallPower=originalPower.map((v,i)=>v+(i===1?8:0));drawPower();});
+$("powerCanvas").addEventListener("click",e=>{const r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*e.target.width,i=Math.round(clamp((x-50)/(860-50-20)*11-0.5,0,10));smallPower=smallFreq.map((_,j)=>j===i?10:0);drawPower();});
+
+// 3. The two frequency rulers.
+let melMode="mel";
+function drawMel(){
+  const f=Number($("melF").value),m=hzToMel(f),mMax=hzToMel(8000);
+  $("melFV").textContent=f;$("melMV").textContent=fmt(m,1);
+  const points=melMode==="mel"?Array.from({length:6},(_,i)=>melToHz(mMax*i/5)):Array.from({length:6},(_,i)=>1600*i);
+  const {g,W,H}=ctx("melCanvas"),left=65,right=W-35,top=65,bottom=245,XF=x=>left+x/8000*(right-left),XM=x=>left+x/mMax*(right-left);
+  line(g,left,top,right,top,"#2563eb",3);line(g,left,bottom,right,bottom,"#ea580c",3);
+  label(g,"Hz 尺子（物理频率）",left,top-28,"#2563eb",15);label(g,"Mel 尺子（感知坐标）",left,bottom-28,"#ea580c",15);
+  [0,2000,4000,6000,8000].forEach(x=>{line(g,XF(x),top-6,XF(x),top+6,"#2563eb");label(g,String(x),XF(x),top+25,"#2563eb",12,"center");});
+  [0,1000,2000,mMax].forEach(x=>{line(g,XM(x),bottom-6,XM(x),bottom+6,"#ea580c");label(g,fmt(x,0),XM(x),bottom+25,"#ea580c",12,"center");});
+  points.forEach((x,i)=>{const mm=hzToMel(x);line(g,XF(x),top+35,XM(mm),bottom-38,"#94a3b8",1,[4,4]);g.beginPath();g.arc(XF(x),top,6,0,2*Math.PI);g.fillStyle="#2563eb";g.fill();g.beginPath();g.arc(XM(mm),bottom,6,0,2*Math.PI);g.fillStyle="#ea580c";g.fill();label(g,fmt(x,0),XF(x),top+49,"#2563eb",11,"center");});
+  line(g,XF(f),top-12,XM(m),bottom+12,"#7c3aed",2);g.beginPath();g.arc(XF(f),top,9,0,2*Math.PI);g.strokeStyle="#7c3aed";g.lineWidth=3;g.stroke();g.beginPath();g.arc(XM(m),bottom,9,0,2*Math.PI);g.stroke();
+  label(g,`当前：${f} Hz ↔ ${fmt(m,1)} Mel`,left,H-18,"#7c3aed",15);
+  const gaps=points.slice(1).map((x,i)=>fmt(x-points[i],0)).join("、");
+  $("melGaps").innerHTML=`6 个点换回 Hz：<b>${points.map(x=>fmt(x,0)).join("、")}</b><br>相邻 Hz 间隔：<b>${gaps}</b>`;
+  $("equalHz").classList.toggle("active",melMode==="hz");$("equalMel").classList.toggle("active",melMode==="mel");
+}
+$("melF").addEventListener("input",drawMel);
+document.querySelectorAll("[data-melf]").forEach(b=>b.addEventListener("click",()=>{$("melF").value=b.dataset.melf;drawMel();}));
+$("equalHz").addEventListener("click",()=>{melMode="hz";drawMel();});$("equalMel").addEventListener("click",()=>{melMode="mel";drawMel();});
+
+// 4-5. The exact filter bank used by the project.
+const binFreq=Array.from({length:201},(_,i)=>i*40),melMax=hzToMel(8000);
+const anchors=Array.from({length:82},(_,i)=>melToHz(melMax*i/81));
+const centers=anchors.slice(1,-1);
+const filters=Array.from({length:80},(_,m)=>binFreq.map(f=>weight(f,anchors[m],anchors[m+1],anchors[m+2])));
+function drawBank(){
+  const m=Number($("bankM").value),l=anchors[m],c=anchors[m+1],u=anchors[m+2];$("bankMV").textContent=m;
+  const {g,W,H}=ctx("bankCanvas"),p={l:55,r:25,t:35,b:48},pw=W-p.l-p.r,ph=H-p.t-p.b,X=f=>p.l+f/8000*pw,Y=v=>H-p.b-v*ph;
+  line(g,p.l,H-p.b,W-p.r,H-p.b);line(g,p.l,p.t,p.l,H-p.b);
+  for(let f=0;f<=8000;f+=1000){line(g,X(f),H-p.b,X(f),H-p.b+5);label(g,String(f),X(f),H-p.b+20,"#64748b",11,"center");}
+  [0,0.5,1].forEach(v=>label(g,fmt(v,1),p.l-10,Y(v)+4,"#64748b",12,"right"));
+  filters.forEach((_,j)=>{g.beginPath();g.moveTo(X(anchors[j]),Y(0));g.lineTo(X(anchors[j+1]),Y(1));g.lineTo(X(anchors[j+2]),Y(0));g.strokeStyle=j===m?"#7c3aed":"#94a3b855";g.lineWidth=j===m?4:1;g.stroke();});
+  label(g,"80 条理想三角权重曲线（紫色为当前选择）",p.l,p.t-12,"#64748b",13);label(g,"Hz",W-p.r,H-7,"#64748b",12,"right");
+  $("bankInfo").innerHTML=`L = <b>${fmt(l)} Hz</b>　C = <b>${fmt(c)} Hz</b>　U = <b>${fmt(u)} Hz</b>　总宽 U−L = <b>${fmt(u-l)} Hz</b><br>实际矩阵只在 201 个频率格上采样；当前最大离散权重 = <b>${fmt(Math.max(...filters[m]))}</b>，中心不落在格子上时不会采到 1`;
+  const z=ctx("zoomCanvas"),zg=z.g,zW=z.W,zH=z.H,zp={l:55,r:25,t:30,b:45},margin=(u-l)*0.18,zmin=Math.max(0,l-margin),zmax=Math.min(8000,u+margin),zpw=zW-zp.l-zp.r,zph=zH-zp.t-zp.b,ZX=f=>zp.l+(f-zmin)/(zmax-zmin)*zpw,ZY=v=>zH-zp.b-v*zph;
+  line(zg,zp.l,zH-zp.b,zW-zp.r,zH-zp.b);line(zg,zp.l,zp.t,zp.l,zH-zp.b);
+  zg.beginPath();[[l,0],[c,1],[u,0]].forEach(([f,v],i)=>{const x=ZX(f),y=ZY(v);i?zg.lineTo(x,y):zg.moveTo(x,y);});zg.strokeStyle="#7c3aed";zg.lineWidth=3;zg.stroke();
+  line(zg,ZX(c),ZY(0),ZX(c),ZY(1),"#ea580c",1,[4,4]);
+  binFreq.forEach((f,k)=>{if(f<zmin||f>zmax)return;line(zg,ZX(f),zH-zp.b,ZX(f),zH-zp.b+5);label(zg,fmt(f,0),ZX(f),zH-zp.b+19,"#64748b",10,"center");const v=filters[m][k];line(zg,ZX(f),ZY(0),ZX(f),ZY(v),"#7c3aed55",2);zg.beginPath();zg.arc(ZX(f),ZY(v),4,0,2*Math.PI);zg.fillStyle="#7c3aed";zg.fill();});
+  [0,0.5,1].forEach(v=>label(zg,fmt(v,1),zp.l-10,ZY(v)+4,"#64748b",12,"right"));
+  label(zg,`第 ${m} 个：实线 = 理想三角形；圆点 = 实际离散权重；橙虚线 = 中心`,zp.l,zp.t-10,"#64748b",13);
+}
+$("bankM").addEventListener("input",drawBank);
+document.querySelectorAll("[data-bankm]").forEach(b=>b.addEventListener("click",()=>{$("bankM").value=b.dataset.bankm;drawBank();}));
+$("bankCanvas").addEventListener("click",e=>{const r=e.target.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*e.target.width,f=clamp((x-55)/(860-55-25),0,1)*8000;let best=0;centers.forEach((c,i)=>{if(Math.abs(c-f)<Math.abs(centers[best]-f))best=i;});$("bankM").value=best;drawBank();});
+
+let signalKind="dual";
+function makePower(kind){
+  return binFreq.map((f,k)=>{
+    if(kind==="low")return 0.03+9*Math.exp(-0.5*((f-500)/130)**2);
+    if(kind==="noise")return 0.5+2.5*(0.5+0.5*Math.sin(k*12.9898+1.7))*(0.5+0.5*Math.sin(k*4.137+0.2));
+    return 0.03+8*Math.exp(-0.5*((f-800)/150)**2)+6*Math.exp(-0.5*((f-3000)/300)**2);
+  });
+}
+function drawApply(){
+  const m=Number($("applyM").value),power=makePower(signalKind),mel=filters.map(row=>row.reduce((s,w,k)=>s+w*power[k],0)),pmax=Math.max(...power),mmax=Math.max(...mel);$("applyMV").textContent=m;
+  const {g,W,H}=ctx("fullPowerCanvas"),p={l:50,r:20,t:30,b:42},pw=W-p.l-p.r,ph=H-p.t-p.b,X=f=>p.l+f/8000*pw,Y=v=>H-p.b-v/pmax*ph;
+  line(g,p.l,H-p.b,W-p.r,H-p.b);
+  power.forEach((v,k)=>{g.fillStyle="#2563eb";g.fillRect(X(binFreq[k])-1.2,Y(v),2.4,H-p.b-Y(v));});
+  g.beginPath();[[anchors[m],0],[anchors[m+1],1],[anchors[m+2],0]].forEach(([f,v],i)=>{const x=X(f),y=H-p.b-v*ph;i?g.lineTo(x,y):g.moveTo(x,y);});g.strokeStyle="#059669";g.lineWidth=3;g.stroke();
+  filters[m].forEach((v,k)=>{if(v<=0)return;g.beginPath();g.arc(X(binFreq[k]),H-p.b-v*ph,2.5,0,2*Math.PI);g.fillStyle="#047857";g.fill();});
+  for(let f=0;f<=8000;f+=1000)label(g,String(f),X(f),H-p.b+20,"#64748b",11,"center");
+  label(g,"蓝柱：201 格功率　绿线：理想三角形　绿点：实际离散权重（独立纵轴）",p.l,p.t-10,"#64748b",13);
+  const q=ctx("fullMelCanvas"),qg=q.g,qW=q.W,qH=q.H,qp={l:50,r:20,t:30,b:42},qpw=qW-qp.l-qp.r,qph=qH-qp.t-qp.b,QX=i=>qp.l+(i+0.5)/80*qpw,QY=v=>qH-qp.b-v/mmax*qph;
+  line(qg,qp.l,qH-qp.b,qW-qp.r,qH-qp.b);
+  mel.forEach((v,i)=>{const bw=qpw/80*0.8;qg.fillStyle=i===m?"#ea580c":"#7c3aed";qg.fillRect(QX(i)-bw/2,QY(v),bw,qH-qp.b-QY(v));});
+  [0,20,40,60,79].forEach(i=>label(qg,String(i),QX(i),qH-qp.b+20,"#64748b",11,"center"));label(qg,"Mel 滤波器编号 m",qW-120,qH-7,"#64748b",12);label(qg,"80 个输出：紫色为其他滤波器，橙色为当前 m",qp.l,qp.t-10,"#64748b",13);
+  $("applyInfo").innerHTML=`当前第 ${m} 个滤波器：中心 ${fmt(centers[m])} Hz<br>mel[${m}] = Σ filters[${m},k] × power[k] = <span class="purple">${fmt(mel[m],3)}</span>`;
+}
+$("applyM").addEventListener("input",drawApply);
+[["signalDual","dual"],["signalLow","low"],["signalNoise","noise"]].forEach(([id,kind])=>$(id).addEventListener("click",()=>{signalKind=kind;["signalDual","signalLow","signalNoise"].forEach(x=>$(x).classList.toggle("active",x===id));drawApply();}));
+
+drawOne();drawPower();drawMel();drawBank();drawApply();
+</script>
+</body>
+</html>
