@@ -3,15 +3,23 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ZHYsfl/ai-whys/pulls)
 
-> 一个系统性的 AI 学习路线：**41 个实验、19 章笔记**，从线性回归到 BERT、从 Q-learning 到 PPO、从波形到 neural audio codec 和现代 ASR，每个算法都从零实现，并讲清每个"为什么"。
+> 一个覆盖**深度学习、强化学习与 AI Agents**的系统性学习仓库：**42 个实验、19 章笔记**。从线性回归到 BERT，从 Q-Learning 到 PPO，从 Neural Audio Codec 到现代 ASR，以及当红榨汁机 LLM-Driven AI Agent；每个主题都提供可运行实现，并讲清背后的"为什么"。
 >
 > **作者：周浩洋**（上海交通大学 AI 学院博士在读）· 欢迎交流：**zhouhy5523@gmail.com** · 也欢迎提交 PR、开 issue
 
 ![架构图](pics/arch.png)
 
-## 41 个实验
+## 三条独立主线
 
-共 **41 个实验**，编号与三份笔记中的实验声明一一对应（[dl.md](dl.md) 实验 1–34，[rl.md](rl.md) 实验 35–39，[audio-dl.md](audio-dl.md) 实验 40–41）。每个实验都有三样东西：**数学推导笔记**（dl.md / rl.md / audio-dl.md）、**Excalidraw 插图**（pics/）、**可运行的代码**（code/）——下面清单中，每个实验都附上了笔记原文和代码的直达链接：
+- **深度学习**：`dl.md` 覆盖实验 1–34；`audio-dl.md` 覆盖实验 40–41，作为音频/语音深度学习方向的延伸。
+- **强化学习**：`rl.md` 覆盖实验 35–39，围绕策略、价值函数与策略优化展开。
+- **AI Agents**：`ai_agents.md` 与 `code/ai-agents/` 构成独立模块，围绕 LLM-driven Agent 的决策循环、工具系统、记忆机制与工程实现展开；不是深度学习或强化学习章节的附属内容。
+
+三条主线可以独立学习，实验编号用于统一索引，不代表必须跨模块依次完成。
+
+## 42 个实验
+
+共 **42 个实验**，编号与四份笔记中的实验声明一一对应（[dl.md](dl.md) 实验 1–34，[rl.md](rl.md) 实验 35–39，[audio-dl.md](audio-dl.md) 实验 40–41，[ai_agents.md](ai_agents.md) 实验 42）。每个实验都有三样东西：**笔记**（dl.md / rl.md / audio-dl.md / ai_agents.md）、**Excalidraw 插图**（pics/）、**可运行的代码**（code/）——下面清单中，每个实验都附上了笔记原文和代码的直达链接：
 
 ### 基础
 
@@ -72,16 +80,20 @@
 40. **Neural Audio Codec**（全卷积 autoencoder + RVQ + GAN对抗训练）— [笔记](audio-dl.md) / [code](code/codec/)（独立 uv 项目，使用方式见 [code/codec/README.md](code/codec/README.md)）
 41. **Modern ASR**（Conformer-CTC + AuT/Qwen3-ASR 从零复现）— [笔记](audio-dl.md#二automatic-speech-recognition-asr) / [code](code/asr/)（独立 uv 项目，使用方式见 [code/asr/README.md](code/asr/README.md)）
 
+### AI Agents
+
+42. **AI Agents**（Agent Loop + 并行工具调用 + 流式输出 + 滑动窗口/压缩记忆）— [笔记](ai_agents.md#实验-42ai-agents-的最小完整实现) / [Go 实现](code/ai-agents/go-framework/agent_runtime/) / [Python 实现](code/ai-agents/python-framework/)
+
 ## 这个项目适合谁
 
-- **想系统性学 AI、但不知道从何开始的本科生**——不需要先修成堆的理论，跟着实验 1 → 41 的顺序走，就是一条完整的深度学习 + 强化学习 + 语音AI入门路线。
+- **想系统性学 AI、但不知道从何开始的本科生**——可以从深度学习、强化学习或 AI Agents 任一模块开始；想建立完整基础时，再逐步补齐其他主线，不必从实验 1 依次学到实验 42。
 - **即将入学的研究生**——把它当作入学前自查清单：每个实验背后的"为什么"，如果你能全部讲清楚，基础就算过关；讲不清楚的，就是开学前该补的课。
 
 ## 每个实验都从三个层面拆解
 
 同一个知识点，三种互补的打开方式：
 
-- **数学推导**（[dl.md](dl.md) / [rl.md](rl.md) / [audio-dl.md](audio-dl.md)）——每个算法从公式推起，符号约定统一（大写为矩阵、小写为标量），先弄清"为什么"再谈"怎么用"
+- **笔记与推导**（[dl.md](dl.md) / [rl.md](rl.md) / [audio-dl.md](audio-dl.md) / [ai_agents.md](ai_agents.md)）——从原理、公式与系统数据流入手，先弄清"为什么"再谈"怎么用"
 - **插图总结**（[pics/](pics)）——30 余张 Excalidraw 手绘风插图，把网络架构、数据流向和张量形状对齐画出来，一张图胜过一页文字
 - **复现代码**（[code/](code)）——从零实现 + 大量中文注释，每个"为什么"都对应一段能跑、能改的代码
 
@@ -89,7 +101,7 @@
 
 这份材料是一个**精炼的总结**：它不追求把每个细节讲满，而是给出路线、推导主干和关键问题，细节留白交给学习过程本身。因此最好的使用方式是——**把它当作地图，结合 AI coding agent（如 Kimi Code、Claude Code、Cursor 等）一起学**：
 
-- **笔记定路线**：按实验 1 → 41 的顺序读 [dl.md](dl.md) / [rl.md](rl.md) / [audio-dl.md](audio-dl.md)，先建立整体脉络，推导卡住的地方直接问 agent
+- **笔记定路线**：三条主线独立选择。深度学习读 [dl.md](dl.md)（实验 1–34），音频/语音延伸读 [audio-dl.md](audio-dl.md)（40–41），强化学习读 [rl.md](rl.md)（35–39），AI Agents 直接从 [ai_agents.md](ai_agents.md)（42）与 `code/ai-agents/` 开始
 - **agent 陪跑细节**：每个实验的代码让 agent 逐行讲解、补齐跳步的推导、搭好环境跑通结果、改参数做对照实验——笔记里记下的那些"为什么"，就是现成的提问起点
 - **输出自己的版本**：学完一个实验后合上笔记，让 agent 抽查你能否讲清背后的"为什么"；讲不清的，回到笔记补
 
@@ -108,9 +120,10 @@
 
 ## 其他材料
 
-- **dl.md**：深度学习笔记，17 章，配套《动手学深度学习》，覆盖线性回归 → CNN/ResNet → RNN/GRU/LSTM → 注意力/Transformer/BERT
+- **dl.md**：深度学习笔记，17 章，配套《动手学深度学习》，覆盖线性回归 → CNN/ResNet → RNN/GRU/LSTM → 注意力/Transformer/BERT（持续更新中）
 - **rl.md**：强化学习笔记，配套《动手学强化学习》（持续更新中）
 - **audio-dl.md**：语音/音频深度学习笔记，覆盖 neural audio codec 与现代 ASR（持续更新中）
+- **ai_agents.md**：LLM-based AI Agents 的理论与工程实践，配套 Go/Python 双实现（持续更新中）
 - **dl_and_rl.svg / dl_and_rl.excalidraw**：学科全景架构图，SVG 矢量版 + Excalidraw 可编辑源文件，可见 DL 与 RL 的知识脉络如何串成一体（`pics/arch.png` 为同一张图的 PNG 导出）
 - **pics/**：30 余张原创插图（Excalidraw 绘制）
 
@@ -120,6 +133,7 @@
 - 安装依赖：`uv pip install -r requirements.txt`
 - 深度学习部分依赖 PyTorch；强化学习部分已迁移至 [gymnasium](https://gymnasium.farama.org/) 最新版 API
 - `code/codec/` 与 `code/asr/` 是独立的 uv 项目（Python 3.12，各有自己的 lock 与测试），不进根目录的 requirements.txt，使用方式见各自 README
+- `code/ai-agents/` 包含独立的 Go module 与 Python uv 项目，分别通过 `go test ./...` 和 `uv run pytest` 验证
 - 注意：`d2l` 包对 torch/numpy 有较严格的版本 pin，若与已装的 PyTorch 冲突，改用 `uv pip install d2l --no-deps` 单独安装
 
 ## 许可证与致谢
