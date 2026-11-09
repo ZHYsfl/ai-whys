@@ -27,7 +27,7 @@
 | DAC | [descriptinc/descript-audio-codec](https://github.com/descriptinc/descript-audio-codec) | MIT |
 | AudioDec | [facebookresearch/AudioDec](https://github.com/facebookresearch/AudioDec) | **CC BY-NC 4.0（非商业）**，部分组件 MIT |
 | SpeechTokenizer | [ZhangXInFD/SpeechTokenizer](https://github.com/ZhangXInFD/SpeechTokenizer) | Apache 2.0 |
-| Mimi | [kyutai-labs/moshi](https://github.com/kyutai-labs/moshi) | Apache 2.0 |
+| Mimi | [kyutai-labs/moshi](https://github.com/kyutai-labs/moshi) | Python 代码 MIT；Rust 代码 Apache 2.0，权重另有 CC-BY 4.0 条款 |
 | WavTokenizer | [jishengpeng/WavTokenizer](https://github.com/jishengpeng/WavTokenizer) | MIT |
 | HiFi-Codec（代码在 AcademiCodec 仓库内） | [yangdongchao/AcademiCodec](https://github.com/yangdongchao/AcademiCodec) | **未附许可证** |
 

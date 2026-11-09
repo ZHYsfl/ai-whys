@@ -1,0 +1,25 @@
+[project]
+name = "teaching-version-agent-runtime"
+version = "0.1.0"
+description = "A Python replica of the Go agent runtime with tools, streaming, and memory policies"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0,<3",
+    "python-dotenv>=1,<2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8,<9",
+]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
