@@ -3,7 +3,7 @@
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ZHYsfl/ai-whys/pulls)
 
-> 一个覆盖**深度学习、强化学习与 AI Agents**的系统性学习仓库：**42 个实验、19 章笔记**。从线性回归到 BERT，从 Q-Learning 到 PPO，从 Neural Audio Codec 到现代 ASR，以及当红榨汁机 LLM-Driven AI Agent；每个主题都提供可运行实现，并讲清背后的"为什么"。
+> 一个覆盖**深度学习、强化学习与 AI Agents**的系统性学习仓库：**42 个实验、19 章笔记**。从线性回归到 BERT，从 Q-Learning 到 PPO，从 Neural Audio Codec 到现代 ASR，以及“当红炸子鸡” LLM-Driven AI Agent；每个主题都提供可运行实现，并讲清背后的"为什么"。
 >
 > **作者：周浩洋**（上海交通大学 AI 学院博士在读）· 欢迎交流：**zhouhy5523@gmail.com** · 也欢迎提交 PR、开 issue
 
@@ -146,6 +146,7 @@
 - **强化学习代码**改写自[《动手学强化学习》](https://hrl.boyuai.com)（[boyu-ai/Hands-on-RL](https://github.com/boyu-ai/Hands-on-RL)，原代码以 Apache-2.0 发布），并迁移至 gymnasium 最新版 API；
 - **音频 codec 代码**（[code/codec/](code/codec/)）为本项目独立重写的教学实现，架构参照 SoundStream / EnCodec / DAC 等经典工作，各原仓库许可证与合规要点见 [code/codec/REFERENCES.md](code/codec/REFERENCES.md)；
 - **ASR 代码**（[code/asr/](code/asr/)）为本项目独立重写的教学实现，包含 Conformer-CTC 与 AuT/Qwen3-ASR 两条从零实现路线，参考工作及许可证见 [code/asr/REFERENCES.md](code/asr/REFERENCES.md)；
+- **AI Agents框架代码**均为原创。
 - 训练工具依赖 [d2l PyPI 包](https://pypi.org/project/d2l/)（MIT-0）。
 
 笔记（dl.md / rl.md）与插图（pics/）为本项目原创内容。
