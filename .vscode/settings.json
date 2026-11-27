@@ -1,8 +1,9 @@
 {
-    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
     "python.analysis.extraPaths": [
         "${workspaceFolder}/code/softmax_regression",
         "${workspaceFolder}/code/cnn",
-        "${workspaceFolder}/code/resnet"
+        "${workspaceFolder}/code/resnet",
+        "${workspaceFolder}/code/codec/src",
+        "${workspaceFolder}/code/full-duplex-chat/moshi/src"
     ]
 }

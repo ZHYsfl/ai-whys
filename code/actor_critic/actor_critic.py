@@ -89,7 +89,7 @@ device = torch.device("cuda") if torch.cuda.is_available() else torch.device(
 env_name = 'CartPole-v1'  # v0已废弃，v1是当前版本（上限500步）
 env = gym.make(env_name)
 torch.manual_seed(0)
-env.reset(seed=0)  # gymnasium用reset(seed=)设环境种子（旧版gym是env.seed(0)，已移除）
+env.reset(seed=0)  # 设置环境种子
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
 agent = ActorCritic(state_dim, hidden_dim, action_dim, actor_lr, critic_lr,

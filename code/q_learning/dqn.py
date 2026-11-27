@@ -107,7 +107,7 @@ env = gym.make(env_name)
 random.seed(0)
 np.random.seed(0)
 torch.manual_seed(0)
-env.reset(seed=0)  # gymnasium用reset(seed=)设环境种子（旧版gym是env.seed(0)，已移除）
+env.reset(seed=0)  # 设置环境种子
 replay_buffer = ReplayBuffer(buffer_size)
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.n
