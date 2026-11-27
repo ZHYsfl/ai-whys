@@ -1,9 +1,9 @@
 # ai-whys
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/ZHYsfl/ai-whys/pulls)
+[![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](https://github.com/ZHYsfl/ai-whys/pulls)
 
-> 一个覆盖**深度学习、强化学习与 AI Agents**的系统性学习仓库：**42 个实验、19 章笔记**。从线性回归到 BERT，从 Q-Learning 到 PPO，从 Neural Audio Codec 到现代 ASR，以及“当红炸子鸡” LLM-Driven AI Agent；每个主题都提供可运行实现，并讲清背后的"为什么"。
+> 一个覆盖**深度学习、强化学习与 AI Agents**的系统性学习仓库：**43 个实验、27 章笔记**。从线性回归到 BERT，从 Q-Learning 到 PPO，从 Neural Audio Codec 到现代 ASR 与全双工 Moshi，以及近年快速发展的 LLM-Driven AI Agent；每个主题都提供可运行实现，并讲清背后的"为什么"。
 >
 > **作者：周浩洋**（上海交通大学 AI 学院博士在读）· 欢迎交流：**zhouhy5523@gmail.com** · 也欢迎提交 PR、开 issue
 
@@ -11,15 +11,15 @@
 
 ## 三条独立主线
 
-- **深度学习**：`dl.md` 覆盖实验 1–34；`audio-dl.md` 覆盖实验 40–41，作为音频/语音深度学习方向的延伸。
-- **强化学习**：`rl.md` 覆盖实验 35–39，围绕策略、价值函数与策略优化展开。
-- **AI Agents**：`ai_agents.md` 与 `code/ai-agents/` 构成独立模块，围绕 LLM-driven Agent 的决策循环、工具系统、记忆机制与工程实现展开；不是深度学习或强化学习章节的附属内容。
+- **深度学习**：`dl.md` **17 章**（一～十七），覆盖实验 1–34；`audio-dl.md` **3 章**（一～三），覆盖实验 40–42，作为音频/语音深度学习方向的延伸。
+- **强化学习**：`rl.md` **6 章**（一～六），覆盖实验 35–39，围绕策略、价值函数与策略优化展开。
+- **AI Agents**：`ai_agents.md` **1 章**，与 `code/ai-agents/` 构成独立模块，围绕 LLM-driven Agent 的决策循环、工具系统、记忆机制与工程实现展开；不是深度学习或强化学习章节的附属内容。
 
-三条主线可以独立学习，实验编号用于统一索引，不代表必须跨模块依次完成。
+三条主线可以独立学习：实验编号跨笔记连续（1–43），章节编号在各笔记内独立、合计 **27 章**（17 + 6 + 3 + 1）；两套编号都只用于统一索引，不代表必须跨模块依次完成。
 
-## 42 个实验
+## 43 个实验
 
-共 **42 个实验**，编号与四份笔记中的实验声明一一对应（[dl.md](dl.md) 实验 1–34，[rl.md](rl.md) 实验 35–39，[audio-dl.md](audio-dl.md) 实验 40–41，[ai_agents.md](ai_agents.md) 实验 42）。每个实验都有三样东西：**笔记**（dl.md / rl.md / audio-dl.md / ai_agents.md）、**Excalidraw 插图**（pics/）、**可运行的代码**（code/）——下面清单中，每个实验都附上了笔记原文和代码的直达链接：
+共 **43 个实验**，编号与四份笔记中的实验声明一一对应（[dl.md](dl.md) 实验 1–34，[rl.md](rl.md) 实验 35–39，[audio-dl.md](audio-dl.md) 实验 40–42，[ai_agents.md](ai_agents.md) 实验 43）。每个实验都有三样东西：**笔记**（dl.md / rl.md / audio-dl.md / ai_agents.md）、**Excalidraw 插图**（pics/）、**可运行的代码**（code/）——下面清单中，每个实验都附上了笔记原文和代码的直达链接：
 
 ### 基础
 
@@ -32,7 +32,7 @@
 4. **交叉相关** — [笔记](dl.md#实验4交叉相关的具体实现) / [code](code/cnn/cross_correlation.py)
 5. **填充与步幅** — [笔记](dl.md#实验5填充和步幅的具体实现) / [code](code/cnn/padding_and_stride.py)
 6. **1×1 卷积**（与全连接层等价的验证）— [笔记](dl.md#实验61x1卷积的具体实现以及和全连接层等价的验证) / [code](code/cnn/one_multiply_one_convolution.py)
-7. **多输入/输出通道** — [笔记](dl.md#实验7多输入通道和多输出通道的具体实现) / [code](code/cnn/multi_input_and_output_channels.py)
+7. **多输入/输出通道** — [笔记](dl.md#实验7多输入通道和多输出通道) / [code](code/cnn/multi_input_and_output_channels.py)
 8. **池化层** — [笔记](dl.md#实验8池化层的具体实现) / [code](code/cnn/polling.py)
 9. **LeNet** — [笔记](dl.md#实验9lenet的具体实现) / [code](code/cnn/lenet.py)
 10. **AlexNet** — [笔记](dl.md#实验10alexnet的具体实现) / [code](code/cnn/alexnet.py)
@@ -44,7 +44,7 @@
 
 14. **Batch Normalization** — [笔记](dl.md#实验14batch-normalization的具体实现) / [从零手写](code/batch_normalization/batch_normalization_low_level.py) / [PyTorch 实现](code/batch_normalization/batch_normalization_high_level.py)
 15. **ResNet** — [笔记](dl.md#实验15resnet的具体实现) / [code](code/resnet/resnet.py)
-16. **多 GPU 数据并行** — [笔记](dl.md#实验16数据并行的具体实现) / [从零手写](code/multi_gpu_training/multi_gpu_training_low_level.py) / [PyTorch 实现](code/multi_gpu_training/multi_gpu_training_high_level.py)
+16. **多 GPU 数据并行** — [笔记](dl.md#实验16多gpu数据并行的具体实现) / [从零手写](code/multi_gpu_training/multi_gpu_training_low_level.py) / [PyTorch 实现](code/multi_gpu_training/multi_gpu_training_high_level.py)
 
 ### 自然语言处理
 
@@ -62,7 +62,7 @@
 28. **seq2seq** — [笔记](dl.md#实验28seq2seq的实现) / [code](code/nlp/seq2seq.py)
 29. **无参注意力（Nadaraya-Watson）** — [笔记](dl.md#实验29无参注意力机制的实现) / [code](code/nlp/nadaraya_watson.py)
 30. **两种注意力评分函数** — [笔记](dl.md#实验30两种attention-score-function的实现) / [code](code/nlp/attention_score.py)
-31. **Bahdanau 注意力 seq2seq** — [笔记](dl.md#实验31注意力机制在seq2seq的应用) / [code](code/nlp/bahdanau_attention.py)
+31. **Bahdanau 注意力 seq2seq** — [笔记](dl.md#实验31bahdanau注意力在seq2seq的应用) / [code](code/nlp/bahdanau_attention.py)
 32. **多头注意力** — [笔记](dl.md#实验32多头注意力的实现) / [code](code/nlp/multi_head_attention.py)
 33. **Transformer** — [笔记](dl.md#实验33transformer的实现) / [code](code/nlp/transformer.py)
 34. **BERT**（MLM + NSP 预训练）— [笔记](dl.md#实验34bert-pretraining-phase的实现) / [code](code/nlp/bert.py) / [数据管线](code/nlp/bert_pretrain_dataset.py) / [预训练循环](code/nlp/bert_pretrain.py)
@@ -73,20 +73,21 @@
 36. **DQN** — [笔记](rl.md#实验36dqn-的实现) / [code](code/q_learning/dqn.py)
 37. **REINFORCE** — [笔记](rl.md#实验37reinforce-的实现) / [code](code/reinforce/reinforce.py)
 38. **Actor-Critic** — [笔记](rl.md#实验38actor-critic-的实现) / [code](code/actor_critic/actor_critic.py)
-39. **PPO**（已迁移至 gymnasium 最新版 API）— [笔记](rl.md#实验39ppo-的实现) / [code](code/actor_critic/ppo.py)
+39. **PPO** — [笔记](rl.md#实验39ppo-的实现) / [code](code/actor_critic/ppo.py)
 
-### 音频（语音AI和语音大模型方向）
+### 音频/语音
 
 40. **Neural Audio Codec**（全卷积 autoencoder + RVQ + GAN对抗训练）— [笔记](audio-dl.md) / [code](code/codec/)（独立 uv 项目，使用方式见 [code/codec/README.md](code/codec/README.md)）
 41. **Modern ASR**（Conformer-CTC + AuT/Qwen3-ASR 从零复现）— [笔记](audio-dl.md#二automatic-speech-recognition-asr) / [code](code/asr/)（独立 uv 项目，使用方式见 [code/asr/README.md](code/asr/README.md)）
+42. **Full-duplex Moshi**（Mimi + 17 流 RQ-Transformer + 训练/推理/LoRA）— [笔记](audio-dl.md#三full-duplex-spoken-dialogue-moshi) / [code](code/full-duplex-chat/moshi/)（独立 uv 项目，使用方式见 [code/full-duplex-chat/moshi/README.md](code/full-duplex-chat/moshi/README.md)）
 
 ### AI Agents
 
-42. **AI Agents**（Agent Loop + 并行工具调用 + 流式输出 + 滑动窗口/压缩记忆）— [笔记](ai_agents.md#实验-42ai-agents-的最小完整实现) / [Go 实现](code/ai-agents/go-framework/agent_runtime/) / [Python 实现](code/ai-agents/python-framework/)
+43. **AI Agents**（Agent Loop + 并行工具调用 + 流式输出 + 滑动窗口/压缩记忆）— [笔记](ai_agents.md#实验-43ai-agents-的最小完整实现) / [Go 实现](code/ai-agents/go-framework/agent_runtime/) / [Python 实现](code/ai-agents/python-framework/)
 
 ## 这个项目适合谁
 
-- **想系统性学 AI、但不知道从何开始的本科生**——可以从深度学习、强化学习或 AI Agents 任一模块开始；想建立完整基础时，再逐步补齐其他主线，不必从实验 1 依次学到实验 42。
+- **想系统性学 AI、但不知道从何开始的本科生**——可以从深度学习、强化学习或 AI Agents 任一模块开始；想建立完整基础时，再逐步补齐其他主线，不必从实验 1 依次学到实验 43。
 - **即将入学的研究生**——把它当作入学前自查清单：每个实验背后的"为什么"，如果你能全部讲清楚，基础就算过关；讲不清楚的，就是开学前该补的课。
 
 ## 每个实验都从三个层面拆解
@@ -94,14 +95,14 @@
 同一个知识点，三种互补的打开方式：
 
 - **笔记与推导**（[dl.md](dl.md) / [rl.md](rl.md) / [audio-dl.md](audio-dl.md) / [ai_agents.md](ai_agents.md)）——从原理、公式与系统数据流入手，先弄清"为什么"再谈"怎么用"
-- **插图总结**（[pics/](pics)）——30 余张 Excalidraw 手绘风插图，把网络架构、数据流向和张量形状对齐画出来，一张图胜过一页文字
+- **插图总结**（[pics/](pics)）——43 张 Excalidraw 手绘风插图，把网络架构、数据流向和张量形状对齐画出来，一张图胜过一页文字
 - **复现代码**（[code/](code)）——从零实现 + 大量中文注释，每个"为什么"都对应一段能跑、能改的代码
 
 ## 建议的学习方式
 
 这份材料是一个**精炼的总结**：它不追求把每个细节讲满，而是给出路线、推导主干和关键问题，细节留白交给学习过程本身。因此最好的使用方式是——**把它当作地图，结合 AI coding agent（如 Kimi Code、Claude Code、Cursor 等）一起学**：
 
-- **笔记定路线**：三条主线独立选择。深度学习读 [dl.md](dl.md)（实验 1–34），音频/语音延伸读 [audio-dl.md](audio-dl.md)（40–41），强化学习读 [rl.md](rl.md)（35–39），AI Agents 直接从 [ai_agents.md](ai_agents.md)（42）与 `code/ai-agents/` 开始
+- **笔记定路线**：三条主线独立选择。深度学习读 [dl.md](dl.md)（实验 1–34），音频/语音延伸读 [audio-dl.md](audio-dl.md)（40–42），强化学习读 [rl.md](rl.md)（35–39），AI Agents 直接从 [ai_agents.md](ai_agents.md)（43）与 `code/ai-agents/` 开始
 - **agent 陪跑细节**：每个实验的代码让 agent 逐行讲解、补齐跳步的推导、搭好环境跑通结果、改参数做对照实验——笔记里记下的那些"为什么"，就是现成的提问起点
 - **输出自己的版本**：学完一个实验后合上笔记，让 agent 抽查你能否讲清背后的"为什么"；讲不清的，回到笔记补
 
@@ -122,19 +123,28 @@
 
 - **dl.md**：深度学习笔记，17 章，配套《动手学深度学习》，覆盖线性回归 → CNN/ResNet → RNN/GRU/LSTM → 注意力/Transformer/BERT（持续更新中）
 - **rl.md**：强化学习笔记，配套《动手学强化学习》（持续更新中）
-- **audio-dl.md**：语音/音频深度学习笔记，覆盖 neural audio codec 与现代 ASR（持续更新中）
+- **audio-dl.md**：语音/音频深度学习笔记，覆盖 neural audio codec、现代 ASR 与全双工 Moshi（持续更新中）
 - **ai_agents.md**：LLM-based AI Agents 的理论与工程实践，配套 Go/Python 双实现（持续更新中）
-- **dl_and_rl.svg / dl_and_rl.excalidraw**：学科全景架构图，SVG 矢量版 + Excalidraw 可编辑源文件，可见 DL 与 RL 的知识脉络如何串成一体（`pics/arch.png` 为同一张图的 PNG 导出）
-- **pics/**：30 余张原创插图（Excalidraw 绘制）
+- **dl_and_rl_and_ai_agent.svg / dl_and_rl_and_ai_agent.excalidraw**：学科全景架构图，SVG 矢量版 + Excalidraw 可编辑源文件，可见 DL、RL 与 AI Agent 的知识脉络如何串成一体（`pics/arch.png` 为同一张图的 PNG 导出）
+- **pics/**：43 张原创插图（Excalidraw 绘制），另有 3 张由代码生成的实验图
 
 ## 运行环境
 
-- Python 3.14，推荐使用 [uv](https://docs.astral.sh/uv/) 管理虚拟环境
-- 安装依赖：`uv pip install -r requirements.txt`
-- 深度学习部分依赖 PyTorch；强化学习部分已迁移至 [gymnasium](https://gymnasium.farama.org/) 最新版 API
-- `code/codec/` 与 `code/asr/` 是独立的 uv 项目（Python 3.12，各有自己的 lock 与测试），不进根目录的 requirements.txt，使用方式见各自 README
-- `code/ai-agents/` 包含独立的 Go module 与 Python uv 项目，分别通过 `go test ./...` 和 `uv run pytest` 验证
-- 注意：`d2l` 包对 torch/numpy 有较严格的版本 pin，若与已装的 PyTorch 冲突，改用 `uv pip install d2l --no-deps` 单独安装
+`code/` 下每个目录都是一个 uv 项目。进入任意章节目录：
+
+```bash
+uv sync
+uv run python linreg_low_level.py
+```
+
+- Python 版本与依赖版本由各目录的 `pyproject.toml` / `uv.lock` 锁定。
+- `code/ai-agents/` 还包含 Go module，通过 `go test ./...` 验证。
+- 少数脚本会跨章引用（例如 `batch_normalization` 用到 `cnn/lenet.py`），运行时把被引用目录加入 `PYTHONPATH`：
+
+```bash
+cd code/batch_normalization
+PYTHONPATH=../cnn:../softmax_regression uv run python batch_normalization_high_level.py
+```
 
 ## 许可证与致谢
 
@@ -143,12 +153,13 @@
 代码并非全部原创，致谢如下：
 
 - **深度学习代码**改写自[《动手学深度学习》](https://zh.d2l.ai)（[d2l-ai/d2l-zh](https://github.com/d2l-ai/d2l-zh)，原内容以 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) 发布），在学习过程中加入了大量中文注释与工程改进；
-- **强化学习代码**改写自[《动手学强化学习》](https://hrl.boyuai.com)（[boyu-ai/Hands-on-RL](https://github.com/boyu-ai/Hands-on-RL)，原代码以 Apache-2.0 发布），并迁移至 gymnasium 最新版 API；
+- **强化学习代码**改写自[《动手学强化学习》](https://hrl.boyuai.com)（[boyu-ai/Hands-on-RL](https://hrl.boyuai.com)，原代码以 Apache-2.0 发布），并迁移至 gymnasium 最新版 API；
 - **音频 codec 代码**（[code/codec/](code/codec/)）为本项目独立重写的教学实现，架构参照 SoundStream / EnCodec / DAC 等经典工作，各原仓库许可证与合规要点见 [code/codec/REFERENCES.md](code/codec/REFERENCES.md)；
 - **ASR 代码**（[code/asr/](code/asr/)）为本项目独立重写的教学实现，包含 Conformer-CTC 与 AuT/Qwen3-ASR 两条从零实现路线，参考工作及许可证见 [code/asr/REFERENCES.md](code/asr/REFERENCES.md)；
-- **AI Agents框架代码**均为原创。
+- **Moshi 代码**（[code/full-duplex-chat/moshi/](code/full-duplex-chat/moshi/)）为本项目改写并重新组织的教学实现，派生自 kyutai-labs/moshi（MIT）与 moshi-finetune（Apache-2.0），并复用 AudioCraft 的若干 MIT 组件；文件级派生关系、修改说明与完整许可证见 [code/full-duplex-chat/moshi/REFERENCES.md](code/full-duplex-chat/moshi/REFERENCES.md) 与 [NOTICE](code/full-duplex-chat/moshi/NOTICE)；
+- **AI Agents 框架代码**均为原创。
 - 训练工具依赖 [d2l PyPI 包](https://pypi.org/project/d2l/)（MIT-0）。
 
-笔记（dl.md / rl.md）与插图（pics/）为本项目原创内容。
+笔记（dl.md / rl.md / audio-dl.md / ai_agents.md）与插图（pics/）为本项目原创内容。
 
 本项目是独立的学习项目，与上述书籍作者及出版社无任何隶属或背书关系。

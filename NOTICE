@@ -25,3 +25,20 @@ Copyright 2026 周浩洋
    - 原协议：MIT-0（MIT No Attribution）
    - 说明：运行依赖（未包含在本仓库中，由环境配置安装），
      提供 d2l.Accumulator 等训练工具函数。
+
+4. Moshi / AudioCraft
+   - Moshi：https://github.com/kyutai-labs/moshi
+   - AudioCraft：https://github.com/facebookresearch/audiocraft
+   - 说明：code/full-duplex-chat/moshi/ 包含对 Moshi PyTorch 与其
+     AudioCraft 组件的修改和重组；Kyutai 与 Meta Platforms, Inc. and affiliates
+     的版权声明保留在对应源码头部。Python 代码采用 MIT License。
+   - 完整文本：code/full-duplex-chat/moshi/LICENSES/MIT-moshi.txt 与
+     code/full-duplex-chat/moshi/LICENSES/MIT-audiocraft.txt。
+
+5. Moshi-Finetune
+   - 原仓库：https://github.com/kyutai-labs/moshi-finetune
+   - 原协议：Apache License 2.0
+   - 说明：教学版 Moshi 的双声道数据、文本对齐、加权损失、LoRA 与
+     checkpoint 流程包含对该仓库的修改和重组。
+   - 完整文本：code/full-duplex-chat/moshi/LICENSES/Apache-2.0-moshi-finetune.txt。
+   - 文件级来源与修改说明见 code/full-duplex-chat/moshi/NOTICE 和 REFERENCES.md。

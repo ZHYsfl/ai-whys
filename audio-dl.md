@@ -72,6 +72,8 @@ ASR 的核心问题不是简单地把 RNN 换成 Transformer，而是：**怎样
 
 ![confromer approach](pics/32.png)
 
+![RoPE](pics/37.png)
+
 ### 2. LLM 路线：AuT + projector + Qwen3-style LM (includes RoPE)
 
 Qwen3-ASR 的代表性结构不是“音频直接塞进一个黑盒大模型”，而是多阶段数据流：
@@ -90,3 +92,45 @@ Qwen3-ASR 的代表性结构不是“音频直接塞进一个黑盒大模型”�
 >
 > 两条路线的环境、合成/真实训练、验证集选模、独立转录和形状检查见 [`code/asr/README.md`](code/asr/README.md)。论文、仓库阅读顺序与许可证见 [`code/asr/REFERENCES.md`](code/asr/REFERENCES.md)。
 
+
+---
+
+## 三、full-duplex spoken dialogue: Moshi
+
+Codec 解决波形与离散 audio tokens 的相互转换，ASR 解决语音到文本；Moshi 进一步研究**机器如何一边听、一边说**。它不先把用户语音强制转成文本，也不等待一个完整说话轮次结束，而是联合建模三条信息：Moshi 自己说出的文本、Moshi 的音频、用户的音频。
+
+![Mimi 与 Moshi 总览](pics/39.png)
+
+图中左侧是 Mimi 的编解码器，右侧是 Moshi 的流式推理（上）与训练阶段（下）；后面的图会分别放大这些部分。
+
+这条路线需要同时理解：
+
+1. **Mimi**：因果 SeaNet、瓶颈 Transformer、Split RVQ、语义蒸馏与流式编解码。
+2. **RQ-Transformer**：Temporal 沿时间建模，Depth 沿同一帧的码本建模，避免把 17 条流全部摊平到过长的序列里。
+3. **Inner Monologue**：用 PAD/EPAD 把较稀疏的文本 token 对齐到 12.5 Hz 音频帧，让文本成为当前帧音频生成的前缀。
+4. **延迟与流式状态**：acoustic delay 给 Temporal Transformer 留出建模码本依赖的机会；卷积缓存、overlap-add 和 KV Cache 让逐帧计算与整段计算保持一致。
+5. **训练与微调**：文本和音频分别计算带 mask 的交叉熵，语义码本加权；真实微调数据用左声道表示 Moshi、右声道表示用户，并支持全量微调与 LoRA。
+
+![Mimi 结构](pics/40.png)
+
+编码器由因果 SeaNet、瓶颈 Transformer、2× 下采样和 Split RVQ 组成：语义 VQ 与声学 RVQ 并行量化后相加，解码器再把 8 条码本还原成波形。
+
+![Moshi 训练阶段](pics/41.png)
+
+17 条流先按 `delays` 逐行右移、头部填 initial token，再整段 teacher forcing：Temporal Transformer 预测文本，Depth Transformer 沿同一帧逐码本预测音频，输出按 delay 反移回帧号后与真值算加权交叉熵。
+
+![Moshi 流式推理阶段](pics/42.png)
+
+推理换成逐 tick 的环形 KV Cache：每个 tick 只喂一列，产出当前帧的文本、当前帧的语义和上一帧的声学。
+
+![LoRA](pics/38.png)
+
+LoRA 只训练旁挂的 A/B 两个低秩矩阵：前向是 `xW + scaling·xBA`，合并后 `W' = W + scaling·BA`，推理几乎没有额外开销；图中也对比了全量微调与 LoRA 的显存账本。
+
+教学版保留上述算法结构，但默认缩小隐藏维、层数、词表与数据规模。合成实验只验证数据流、梯度和训练/推理闭环，不宣称复现 7B Moshi 的真实对话能力。
+
+#### 实验 42：Mimi 与全双工 Moshi 的训练、推理和 LoRA/全量微调
+>
+> `code/full-duplex-chat/moshi/`
+>
+> 环境、合成/真实数据训练、官方权重加载、独立语音生成、源码阅读顺序与许可证见 [`code/full-duplex-chat/moshi/README.md`](code/full-duplex-chat/moshi/README.md)。

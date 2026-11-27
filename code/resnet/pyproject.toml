@@ -1,0 +1,10 @@
+[project]
+name = "teaching-version-resnet"
+version = "0.1.0"
+description = "Data-flow-first ResNet scripts"
+requires-python = ">=3.11"
+dependencies = [
+    "d2l==0.17.0",
+    "torch==2.14.1",
+    "torchvision==0.29.1",
+]

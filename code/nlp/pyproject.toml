@@ -1,0 +1,11 @@
+[project]
+name = "teaching-version-nlp"
+version = "0.1.0"
+description = "Data-flow-first NLP scripts"
+requires-python = ">=3.11"
+dependencies = [
+    "d2l==0.17.0",
+    "pandas==3.0.6",
+    "torch==2.14.1",
+    "torchvision==0.29.1",
+]

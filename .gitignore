@@ -6,11 +6,5 @@ __pycache__
 
 data/
 
-asr-clone/
-
-moshi-main/
-moshi-paper/
-moshi-finetune/
-
 *.egg-info
 .pytest_cache/

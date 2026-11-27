@@ -1,0 +1,24 @@
+Teaching Moshi
+==============
+
+This teaching project contains modified and independently reorganized code derived
+from the following official projects:
+
+* kyutai-labs/moshi (PyTorch implementation), Copyright (c) Kyutai,
+  licensed under the MIT License. See LICENSES/MIT-moshi.txt.
+* AudioCraft components used by the Moshi PyTorch implementation,
+  Copyright (c) Meta Platforms, Inc. and affiliates, licensed under the MIT
+  License. See LICENSES/MIT-audiocraft.txt.
+* kyutai-labs/moshi-finetune, licensed under the Apache License, Version 2.0.
+  See LICENSES/Apache-2.0-moshi-finetune.txt.
+
+The modifications remove production-only concerns (distributed training, FSDP,
+CUDA Graph capture, quantized deployment, server clients, and multiple backends),
+add data-flow-oriented teaching interfaces, synthetic datasets, tests, semantic
+distillation and training entry points, and reorganize the model configuration.
+The official packages are not imported or required at runtime.
+
+Original ai-whys code and modifications are covered by the repository's Apache
+License 2.0; see LICENSE. Third-party components retain their original licenses.
+Model weights, tokenizers, and datasets have separate terms which must be checked
+before use or redistribution.
